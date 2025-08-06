@@ -1,28 +1,16 @@
 import React from 'react'
 import Link from 'next/link'
 import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye } from 'lucide-react'
+import type { SearchResult } from '@/models'
 
-interface SearchResult {
-  id: string
-  title: string
-  authors: string[]
-  year: number
-  type: 'article' | 'book' | 'thesis'
-  journal?: string
-  publisher?: string
-  description: string
-  doi?: string
-  url?: string
-  tags: string[]
-  downloadCount: number
-  citationCount: number
-}
+
 
 interface SearchResultItemProps {
   result: SearchResult
+  currentSearchQuery?: string
 }
 
-const SearchResultItem: React.FC<SearchResultItemProps> = ({ result }) => {
+const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSearchQuery }) => {
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
       case 'article':
@@ -56,6 +44,16 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result }) => {
     return `${authors.slice(0, 3).join(', ')} et al.`
   }
 
+  const getDetailHref = (resourceId: string) => {
+    const baseHref = `/detail/${resourceId}`
+    if (currentSearchQuery?.trim()) {
+      const searchParams = new URLSearchParams()
+      searchParams.set('q', currentSearchQuery.trim())
+      return `${baseHref}?${searchParams.toString()}`
+    }
+    return baseHref
+  }
+
   return (
     <div className="bg-background border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
       {/* Header */}
@@ -72,7 +70,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result }) => {
               <span className="text-sm text-muted-foreground">{result.year}</span>
             </div>
             <Link 
-              href={`/detail/${result.id}`}
+              href={getDetailHref(result.id)}
               className="block group"
             >
               <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
@@ -153,7 +151,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result }) => {
             </Link>
           )}
           <Link
-            href={`/detail/${result.id}`}
+            href={getDetailHref(result.id)}
             className="inline-flex items-center px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-md hover:bg-primary/90 transition-colors"
           >
             Details

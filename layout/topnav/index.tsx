@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, Globe, Search } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface Language {
   code: string
@@ -77,8 +78,8 @@ const TopNavigation: React.FC = () => {
             </Link>
           </div>
 
-          {/* Language Switcher */}
-          <div className="flex items-center">
+          {/* Controls */}
+          <div className="flex items-center space-x-3">
             <div className="relative">
               <button
                 onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
@@ -124,6 +125,9 @@ const TopNavigation: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Mobile Menu Button */}
             <button 
