@@ -6,7 +6,7 @@ import SearchComponent from '@/components/Search'
 import Filter from '@/components/Filter'
 import SearchResultItem from '@/components/SearchResultItem'
 import LoadingSkeletonItem from '@/components/LoadingSkeletonItem'
-import { ChevronDown, Grid, List, SortAsc, SortDesc } from 'lucide-react'
+import { Grid, List, SortAsc, SortDesc } from 'lucide-react'
 import { searchResources, sortSearchResults, type SortOption, type SortDirection } from '@/services'
 
 
@@ -73,7 +73,7 @@ export default function SearchPage() {
             {/* Search Info */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-foreground mb-2">
-                Search Results for "{query}"
+                Search Results for &quot;{query}&quot;
               </h1>
               <p className="text-muted-foreground">
                 {isLoading ? 'Searching...' : `Found ${sortedResults.length} results`}

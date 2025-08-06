@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search as SearchIcon, X, FileText, Book, GraduationCap } from 'lucide-react'
-import { getSearchSuggestions } from '@/services'
+import { getSearchSuggestions, type MockResult } from '@/services'
 
 interface SearchProps {
   placeholder?: string
@@ -59,7 +59,7 @@ const Search: React.FC<SearchProps> = ({
     }
   }
 
-  const handleSuggestionClick = (suggestion: any) => {
+  const handleSuggestionClick = (suggestion: MockResult) => {
     setQuery(suggestion.title)
     setSelectedIndex(-1)
     handleSearch(suggestion.title)

@@ -1,4 +1,4 @@
-interface MockResult {
+export interface MockResult {
   id: string
   title: string
   authors: string[]

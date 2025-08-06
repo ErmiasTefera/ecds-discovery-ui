@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import { getFilters } from '@/services'
-import type { FilterOption, FilterGroup } from '@/models'
+import type { FilterOption } from '@/models'
 
 const mockFilters = getFilters()
 

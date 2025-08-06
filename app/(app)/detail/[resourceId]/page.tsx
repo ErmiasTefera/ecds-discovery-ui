@@ -43,7 +43,7 @@ export default function DetailPage() {
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-foreground mb-4">Resource Not Found</h1>
             <p className="text-muted-foreground mb-6">
-              The resource you're looking for doesn't exist or may have been removed.
+              The resource you&apos;re looking for doesn&apos;t exist or may have been removed.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
