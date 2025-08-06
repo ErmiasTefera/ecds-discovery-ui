@@ -8,11 +8,13 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <div>
-        <div style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
+    <div className="min-h-screen flex flex-col">
+        <div className="sticky top-0 z-50">
             <TopNavigation />
         </div>
-        <div>{children}</div>
+        <main className="flex-1">
+            {children}
+        </main>
         <Footer />
     </div>
   )

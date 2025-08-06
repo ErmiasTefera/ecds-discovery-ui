@@ -1,103 +1,276 @@
-import Image from "next/image";
+import React from 'react'
+import Link from 'next/link'
+import { Search, BookOpen, Database, Globe, Users, ArrowRight, CheckCircle } from 'lucide-react'
+import SearchComponent from '@/components/Search'
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary/5 via-background to-secondary/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Hero Title */}
+            <div className="mb-8">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+                Discover Scholarly
+                <span className="text-primary block">Resources</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
+                Access library catalogs, institutional repositories, subscription databases, 
+                and open-access archives in one intelligent search interface.
+              </p>
+            </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {/* Search Component */}
+            <div className="mb-12">
+              <SearchComponent />
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">10M+</div>
+                <div className="text-sm text-muted-foreground">Resources</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">500+</div>
+                <div className="text-sm text-muted-foreground">Databases</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">100+</div>
+                <div className="text-sm text-muted-foreground">Universities</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">24/7</div>
+                <div className="text-sm text-muted-foreground">Access</div>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/search"
+                className="inline-flex items-center px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Start Advanced Search
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="#features"
+                className="inline-flex items-center px-8 py-4 border border-border text-foreground rounded-lg font-semibold hover:bg-secondary transition-colors"
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-16 lg:py-24 bg-secondary/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Unified Academic Discovery
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Search across multiple scholarly databases and repositories with our intelligent platform
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <Search className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Smart Search</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Advanced search with type-ahead suggestions, spell correction, and intelligent filtering
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Live type-ahead results
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Spell correction
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Keyboard navigation
+                </li>
+              </ul>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <Database className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Multiple Sources</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Access content from library catalogs, repositories, and subscription databases
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Library catalogs
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Institutional repositories
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Open access archives
+                </li>
+              </ul>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <BookOpen className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Rich Metadata</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Comprehensive resource information with citations and linked materials
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Full citations
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Author information
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Related resources
+                </li>
+              </ul>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <Globe className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Global Access</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Worldwide scholarly content with multi-language support and localization
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Multi-language interface
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  International databases
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Regional repositories
+                </li>
+              </ul>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Collaboration</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Share searches, export results, and collaborate with research teams
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Export results
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Share search URLs
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Citation formats
+                </li>
+              </ul>
+            </div>
+
+            {/* Feature 6 */}
+            <div className="bg-background rounded-lg p-6 shadow-sm border border-border">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg mr-3">
+                  <ArrowRight className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Easy Navigation</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                Intuitive interface with advanced filtering and result management
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Faceted filtering
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Sort options
+                </li>
+                <li className="flex items-center text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                  Pagination controls
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 lg:py-24">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Ready to Start Discovering?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Join researchers and academics worldwide in finding the scholarly resources you need.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/search"
+              className="inline-flex items-center px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Begin Your Search
+              <Search className="ml-2 w-5 h-5" />
+            </Link>
+            <Link
+              href="#"
+              className="inline-flex items-center px-8 py-4 border border-border text-foreground rounded-lg font-semibold hover:bg-secondary transition-colors"
+            >
+              View Documentation
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
-  );
+  )
 }
