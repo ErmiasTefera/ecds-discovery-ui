@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Search as SearchIcon, X, FileText, Book, GraduationCap } from 'lucide-react'
 
 interface SearchProps {
   placeholder?: string
   className?: string
+  initialQuery?: string
 }
 
 interface MockResult {
@@ -87,12 +88,26 @@ const mockDatabase: MockResult[] = [
 
 const Search: React.FC<SearchProps> = ({ 
   placeholder = "Search for scholarly articles, books, theses, and more...",
-  className = ""
+  className = "",
+  initialQuery
 }) => {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery || '')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [isFocused, setIsFocused] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Update query when URL parameters change or initialQuery is provided
+  useEffect(() => {
+    const urlQuery = searchParams?.get('q') || ''
+    if (initialQuery !== undefined) {
+      setQuery(initialQuery)
+    } else if (urlQuery) {
+      setQuery(urlQuery)
+    }
+  }, [searchParams, initialQuery]) // Removed 'query' from dependencies to avoid conflicts
 
   // Filter mock results based on search query
   const filteredResults = useMemo(() => {
@@ -188,13 +203,29 @@ const Search: React.FC<SearchProps> = ({
       case 'Escape':
         e.preventDefault()
         setSelectedIndex(-1)
-        setQuery('')
+        setIsFocused(false)
+        // Remove focus from the input
+        if (inputRef.current) {
+          inputRef.current.blur()
+        }
         break
     }
   }
 
   const clearSearch = () => {
     setQuery('')
+  }
+
+  const handleFocus = () => {
+    setIsFocused(true)
+  }
+
+  const handleBlur = () => {
+    // Delay hiding suggestions to allow for click events on suggestions
+    setTimeout(() => {
+      setIsFocused(false)
+      setSelectedIndex(-1)
+    }, 150)
   }
 
   return (
@@ -208,10 +239,13 @@ const Search: React.FC<SearchProps> = ({
 
           {/* Search Input */}
           <input
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder={placeholder}
             className="w-full pl-12 pr-12 py-4 text-lg bg-background border-2 border-border rounded-xl 
                      focus:border-primary focus:outline-none focus:ring-0 transition-colors
@@ -250,7 +284,7 @@ const Search: React.FC<SearchProps> = ({
         </div>
 
         {/* Search Suggestions with Mock Results */}
-        {query && filteredResults.length > 0 && (
+        {query && isFocused && filteredResults.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
             <div className="p-2">
               <div className="space-y-1">
@@ -288,7 +322,7 @@ const Search: React.FC<SearchProps> = ({
         )}
 
         {/* No Results Message */}
-        {query && filteredResults.length === 0 && (
+        {query && isFocused && filteredResults.length === 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-lg shadow-lg z-50">
             <div className="p-4">
               <div className="text-sm text-muted-foreground text-left">
