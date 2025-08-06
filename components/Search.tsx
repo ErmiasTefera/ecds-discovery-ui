@@ -1,13 +1,89 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search as SearchIcon, X } from 'lucide-react'
+import { Search as SearchIcon, X, FileText, Book, GraduationCap } from 'lucide-react'
 
 interface SearchProps {
   placeholder?: string
   className?: string
 }
+
+interface MockResult {
+  id: string
+  title: string
+  authors: string[]
+  year: number
+  type: 'article' | 'book' | 'thesis'
+  journal?: string
+  publisher?: string
+}
+
+// Mock data for search suggestions
+const mockDatabase: MockResult[] = [
+  {
+    id: '1',
+    title: 'Machine Learning Applications in Healthcare: A Comprehensive Review',
+    authors: ['Smith, J.', 'Johnson, M.'],
+    year: 2023,
+    type: 'article',
+    journal: 'Journal of Medical AI'
+  },
+  {
+    id: '2',
+    title: 'Deep Learning for Computer Vision: Theory and Practice',
+    authors: ['Chen, L.', 'Williams, R.'],
+    year: 2022,
+    type: 'book',
+    publisher: 'Academic Press'
+  },
+  {
+    id: '3',
+    title: 'Climate Change Impact on Global Food Security',
+    authors: ['Anderson, K.'],
+    year: 2023,
+    type: 'article',
+    journal: 'Environmental Science Today'
+  },
+  {
+    id: '4',
+    title: 'Quantum Computing Algorithms for Optimization Problems',
+    authors: ['Zhang, Y.', 'Brown, A.', 'Davis, P.'],
+    year: 2024,
+    type: 'thesis'
+  },
+  {
+    id: '5',
+    title: 'Artificial Intelligence Ethics in Modern Society',
+    authors: ['Wilson, S.'],
+    year: 2023,
+    type: 'book',
+    publisher: 'Ethics Publications'
+  },
+  {
+    id: '6',
+    title: 'Neural Networks for Natural Language Processing',
+    authors: ['Martinez, C.', 'Lee, H.'],
+    year: 2022,
+    type: 'article',
+    journal: 'Computational Linguistics Review'
+  },
+  {
+    id: '7',
+    title: 'Sustainable Energy Solutions for Urban Development',
+    authors: ['Thompson, R.'],
+    year: 2023,
+    type: 'thesis'
+  },
+  {
+    id: '8',
+    title: 'Blockchain Technology in Financial Services',
+    authors: ['Garcia, M.', 'Ahmed, N.'],
+    year: 2024,
+    type: 'article',
+    journal: 'Financial Technology Quarterly'
+  }
+]
 
 const Search: React.FC<SearchProps> = ({ 
   placeholder = "Search for scholarly articles, books, theses, and more...",
@@ -15,7 +91,47 @@ const Search: React.FC<SearchProps> = ({
 }) => {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const router = useRouter()
+
+  // Filter mock results based on search query
+  const filteredResults = useMemo(() => {
+    if (!query.trim()) return []
+    
+    const searchTerm = query.toLowerCase()
+    return mockDatabase
+      .filter(result => 
+        result.title.toLowerCase().includes(searchTerm) ||
+        result.authors.some(author => author.toLowerCase().includes(searchTerm)) ||
+        result.journal?.toLowerCase().includes(searchTerm) ||
+        result.publisher?.toLowerCase().includes(searchTerm)
+      )
+      .slice(0, 5) // Limit to 5 results
+  }, [query])
+
+  // Reset selected index when results change
+  React.useEffect(() => {
+    setSelectedIndex(-1)
+  }, [filteredResults])
+
+  const getTypeIcon = (type: MockResult['type']) => {
+    switch (type) {
+      case 'article':
+        return <FileText className="w-4 h-4 text-primary" />
+      case 'book':
+        return <Book className="w-4 h-4 text-primary" />
+      case 'thesis':
+        return <GraduationCap className="w-4 h-4 text-primary" />
+      default:
+        return <FileText className="w-4 h-4 text-primary" />
+    }
+  }
+
+  const handleSuggestionClick = (suggestion: MockResult) => {
+    setQuery(suggestion.title)
+    setSelectedIndex(-1)
+    handleSearch(suggestion.title)
+  }
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -36,9 +152,44 @@ const Search: React.FC<SearchProps> = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSearch(query)
+    if (filteredResults.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleSearch(query)
+      }
+      return
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setSelectedIndex(prev => 
+          prev < filteredResults.length - 1 ? prev + 1 : prev
+        )
+        break
+      
+      case 'ArrowUp':
+        e.preventDefault()
+        setSelectedIndex(prev => prev > -1 ? prev - 1 : -1)
+        break
+      
+      case 'Enter':
+        e.preventDefault()
+        if (selectedIndex >= 0 && selectedIndex < filteredResults.length) {
+          // Select the highlighted suggestion
+          const selectedResult = filteredResults[selectedIndex]
+          handleSuggestionClick(selectedResult)
+        } else {
+          // No suggestion selected, search with current query
+          handleSearch(query)
+        }
+        break
+      
+      case 'Escape':
+        e.preventDefault()
+        setSelectedIndex(-1)
+        setQuery('')
+        break
     }
   }
 
@@ -98,26 +249,50 @@ const Search: React.FC<SearchProps> = ({
           </button>
         </div>
 
-        {/* Search Suggestions Placeholder */}
-        {query && (
+        {/* Search Suggestions with Mock Results */}
+        {query && filteredResults.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-            <div className="p-4">
-              <div className="text-sm text-muted-foreground mb-2">Suggestions</div>
-              <div className="space-y-2">
-                <div className="p-2 hover:bg-secondary rounded cursor-pointer text-sm">
-                  {query} in computer science
-                </div>
-                <div className="p-2 hover:bg-secondary rounded cursor-pointer text-sm">
-                  {query} research papers
-                </div>
-                <div className="p-2 hover:bg-secondary rounded cursor-pointer text-sm">
-                  {query} academic articles
-                </div>
+            <div className="p-2">
+              <div className="space-y-1">
+                {filteredResults.map((result, index) => (
+                  <div
+                    key={result.id}
+                    onClick={() => handleSuggestionClick(result)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`p-3 rounded cursor-pointer text-left transition-colors ${
+                      index === selectedIndex 
+                        ? 'bg-secondary' 
+                        : 'hover:bg-secondary'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        {getTypeIcon(result.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate">
+                          {result.title}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="mt-3 pt-3 border-t border-border">
-                <div className="text-xs text-muted-foreground">
-                  Press Enter to search • Use quotes for exact phrases
+                <div className="text-xs text-muted-foreground text-left px-3">
+                  Use ↑↓ arrows to navigate • Press Enter to select • Escape to close
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* No Results Message */}
+        {query && filteredResults.length === 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-lg shadow-lg z-50">
+            <div className="p-4">
+              <div className="text-sm text-muted-foreground text-left">
+                No matching results found. Press Enter to search all databases.
               </div>
             </div>
           </div>
