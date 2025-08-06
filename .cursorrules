@@ -1,0 +1,154 @@
+# Discovery UI - Project Intelligence
+
+## Project Overview
+Discovery UI is a scholarly resource discovery platform built with Next.js 15, React 19, and TypeScript. The goal is to provide unified access to academic materials from multiple sources through an intelligent search interface.
+
+## Architecture Patterns
+
+### Next.js App Router Structure
+- Use (app) route group for main application routes
+- Implement layouts at appropriate levels (root, app-specific)
+- Leverage Server Components for initial data loading
+- Client Components for interactive features only
+
+### Component Organization
+- All components in `/components` directory
+- Layout components in `/layout` with subdirectories
+- Use TypeScript interfaces for all props
+- Default exports for pages, named exports for utilities
+- Functional components with React.FC typing
+
+### Import Patterns
+```typescript
+// Prefer absolute imports with @/ prefix
+import Search from '@/components/Search'
+import TopNavigation from '@/layout/topnav'
+import { utils } from '@/lib/utils'
+```
+
+### Styling Approach
+- Tailwind CSS utility-first approach
+- Use class-variance-authority for component variants
+- Mobile-first responsive design
+- Consistent spacing and color system
+
+## Search Implementation Patterns
+
+### State Management Strategy
+- URL-based state for search queries and filters (enables deep linking)
+- React state for UI interactions (dropdowns, focus states)
+- Server state for API data (leverage React Server Components)
+
+### Search Flow Architecture
+```
+User Input → Debounced Search → URL Update → API Call → Results Display
+     ↓
+URL State ← Filter Updates ← User Selections ← Filter UI
+```
+
+### Performance Considerations
+- Debounce search input (300-500ms)
+- Implement skeleton loading states
+- Use progressive loading for results
+- Cache search results when appropriate
+
+## Component Patterns
+
+### Search Component Requirements
+- Live type-ahead with debouncing
+- Spelling correction suggestions
+- Keyboard navigation (↑/↓, Enter)
+- Search term highlighting
+- Empty state handling
+
+### Filter Component Requirements
+- Faceted search by category
+- AND/OR logic support
+- URL persistence for deep linking
+- Show more/less for long lists
+- Clear visual hierarchy
+
+### Result Display Requirements
+- Card-based layout for results
+- Pagination controls
+- Sort options
+- Export functionality
+- Result count display
+
+## Development Practices
+
+### TypeScript Usage
+- Strict mode enabled
+- Define interfaces for all data structures
+- Use proper React.FC typing for components
+- Avoid 'any' type - prefer unknown or specific types
+
+### Error Handling
+- Graceful degradation for API failures
+- User-friendly error messages
+- Loading states for all async operations
+- Input validation on both client and server
+
+### Accessibility Standards
+- Semantic HTML structure
+- ARIA labels for interactive elements
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management in search interfaces
+
+## Code Quality Standards
+
+### Component Structure
+```typescript
+interface ComponentProps {
+  // Define all props with types
+}
+
+const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // Local state
+  // Event handlers
+  // Render logic
+  return (
+    <div className="utility-classes">
+      {/* JSX content */}
+    </div>
+  )
+}
+
+export default Component
+```
+
+### File Naming Conventions
+- PascalCase for component files (Search.tsx)
+- camelCase for utility files (utils.ts)
+- kebab-case for page routes ([resource-id])
+- Descriptive names that indicate purpose
+
+## Scholarly Resource Context
+
+### Data Structure Considerations
+- Resource metadata (title, author, publication date)
+- Source information (library, repository, database)
+- Citation formats and linked resources
+- Faceting fields (resource type, subject, date range)
+
+### User Experience Priorities
+- Fast search response times
+- Intuitive filtering workflow
+- Clear result presentation
+- Easy navigation between search and detail views
+- Persistent search state for user sessions
+
+## Future Enhancement Areas
+- Advanced search syntax support
+- Saved searches and alerts
+- User accounts and preferences
+- Integration with citation managers
+- Collaborative features for research groups
+
+## Memory Bank Maintenance
+This project uses a comprehensive Memory Bank system in `/memory-bank/` directory:
+- Always read memory bank files when starting work
+- Update activeContext.md after significant changes
+- Maintain progress.md with current status
+- Document new patterns in systemPatterns.md
