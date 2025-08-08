@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useAtom } from 'jotai'
 import { 
   FileText, 
   Book, 
@@ -19,6 +20,9 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import type { DetailResource } from '@/models'
+import { isAuthenticatedAtom } from '@/atoms/authAtoms'
+import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
+import SaveToCollectionModal from './SaveToCollectionModal'
 
 
 
@@ -32,6 +36,9 @@ type TabType = 'overview' | 'references' | 'related' | 'metrics'
 const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, currentSearchQuery }) => {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [isAuthenticated] = useAtom(isAuthenticatedAtom)
+  const isResourceSaved = useAtom(isResourceSavedAtom)[0]
 
   const getTypeIcon = (type: DetailResource['type']) => {
     switch (type) {
@@ -189,9 +196,16 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
             <Share className="w-4 h-4 mr-2" />
             {copySuccess === 'link' ? 'Copied!' : 'Share'}
           </button>
-          <button className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-            <Bookmark className="w-4 h-4 mr-2" />
-            Save
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
+              isResourceSaved(resource.id)
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            }`}
+          >
+            <Bookmark className={`w-4 h-4 mr-2 ${isResourceSaved(resource.id) ? 'fill-current' : ''}`} />
+            {isResourceSaved(resource.id) ? 'Saved' : 'Save'}
           </button>
         </div>
 
@@ -406,6 +420,13 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
           </p>
         </div>
       </div>
+      
+      {/* Save to Collection Modal */}
+      <SaveToCollectionModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        resource={resource}
+      />
     </div>
   )
 }

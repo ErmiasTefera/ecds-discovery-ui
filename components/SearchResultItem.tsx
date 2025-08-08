@@ -1,8 +1,12 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Sparkles, Loader2 } from 'lucide-react'
+import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Sparkles, Loader2, Bookmark } from 'lucide-react'
+import { useAtom } from 'jotai'
 import type { SearchResult } from '@/models'
 import { httpService } from '@/services/httpService'
+import { isAuthenticatedAtom } from '@/atoms/authAtoms'
+import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
+import SaveToCollectionModal from './SaveToCollectionModal'
 
 
 
@@ -32,6 +36,9 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
   const [aiSummary, setAiSummary] = useState<string | null>(null)
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [hasRequestedSummary, setHasRequestedSummary] = useState(false)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [isAuthenticated] = useAtom(isAuthenticatedAtom)
+  const isResourceSaved = useAtom(isResourceSavedAtom)[0]
 
   const handleGetAISummary = async () => {
     if (hasRequestedSummary) return // Prevent multiple requests
@@ -229,6 +236,17 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
               <ExternalLink className="w-3 h-3 ml-1" />
             </Link>
           )}
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              isResourceSaved(result.id)
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                : 'border border-border hover:bg-secondary'
+            }`}
+          >
+            <Bookmark className={`w-3 h-3 ml-1 ${isResourceSaved(result.id) ? 'fill-current' : ''}`} />
+            {isResourceSaved(result.id) ? 'Saved' : 'Save'}
+          </button>
           <Link
             href={getDetailHref(result.id)}
             className="inline-flex items-center px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-md hover:bg-primary/90 transition-colors"
@@ -238,6 +256,13 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
           </Link>
         </div>
       </div>
+      
+      {/* Save to Collection Modal */}
+      <SaveToCollectionModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        resource={result}
+      />
     </div>
   )
 }
