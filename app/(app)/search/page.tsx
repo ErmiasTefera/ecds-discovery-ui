@@ -8,6 +8,22 @@ import SearchResultItem from '@/components/SearchResultItem'
 import LoadingSkeletonItem from '@/components/LoadingSkeletonItem'
 import { Grid, List, SortAsc, SortDesc } from 'lucide-react'
 import { searchResources, sortSearchResults, type SortOption, type SortDirection } from '@/services'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useAtom } from 'jotai'
+import { 
+  searchQueryAtom,
+  advancedSearchCriteriaAtom, 
+  advancedSearchFiltersAtom,
+  isAdvancedSearchActiveAtom,
+  type SearchCriteria,
+  type AdvancedSearchFilters
+} from '@/atoms/searchAtoms'
 
 
 
@@ -18,14 +34,67 @@ export default function SearchPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [currentPage, setCurrentPage] = useState(1)
-  const [resultsPerPage] = useState(10)
+  const [resultsPerPage] = useState(2)
+  const [hasSearched, setHasSearched] = useState(false)
+  
+  const [query, setQuery] = useAtom(searchQueryAtom)
+  const [advancedCriteria, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
+  const [isAdvancedSearchActive] = useAtom(isAdvancedSearchActiveAtom)
 
-  const query = searchParams?.get('q') || ''
+  // Parse advanced search parameters from URL and sync with atoms
+  useEffect(() => {
+    const urlQuery = searchParams?.get('q') || ''
+    setQuery(urlQuery)
+    
+    const criteriaParam = searchParams?.get('criteria')
+    const filtersParam = searchParams?.get('filters')
+    
+    // Set hasSearched to true if there's a query parameter or advanced search parameters
+    if (urlQuery || criteriaParam || filtersParam) {
+      setHasSearched(true)
+    }
+    
+    if (criteriaParam) {
+      try {
+        setAdvancedCriteria(JSON.parse(decodeURIComponent(criteriaParam)))
+      } catch (e) {
+        console.error('Failed to parse criteria from URL:', e)
+      }
+    }
+    
+    if (filtersParam) {
+      try {
+        setAdvancedFilters(JSON.parse(decodeURIComponent(filtersParam)))
+      } catch (e) {
+        console.error('Failed to parse filters from URL:', e)
+      }
+    }
+  }, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters])
 
-    // Filter results based on search query
+  // Filter results based on search query and advanced criteria
   const filteredResults = useMemo(() => {
-    return searchResources(query)
-  }, [query])
+    let results = searchResources(query)
+    
+    // Apply advanced search filters if present
+    if (advancedFilters.format !== 'all') {
+      results = results.filter(result => result.type === advancedFilters.format)
+    }
+    
+    // Note: Language filtering would need to be implemented based on actual data structure
+    // For now, we'll skip language filtering as it's not in the SearchResult model
+    
+    if (advancedFilters.yearFrom || advancedFilters.yearTo) {
+      results = results.filter(result => {
+        const year = result.year
+        const fromYear = advancedFilters.yearFrom ? parseInt(advancedFilters.yearFrom) : 1900
+        const toYear = advancedFilters.yearTo ? parseInt(advancedFilters.yearTo) : 2030
+        return year >= fromYear && year <= toYear
+      })
+    }
+    
+    return results
+  }, [query, advancedFilters])
 
     // Sort results
   const sortedResults = useMemo(() => {
@@ -43,12 +112,12 @@ export default function SearchPage() {
 
   // Simulate loading when search changes
   useEffect(() => {
-    if (query) {
+    if (hasSearched && (query || isAdvancedSearchActive)) {
       setIsLoading(true)
       const timer = setTimeout(() => setIsLoading(false), 800)
       return () => clearTimeout(timer)
     }
-  }, [query])
+  }, [hasSearched, query, isAdvancedSearchActive])
 
   const handleSortChange = (newSortBy: SortOption) => {
     if (sortBy === newSortBy) {
@@ -68,15 +137,49 @@ export default function SearchPage() {
           <SearchComponent initialQuery={query} />
         </div>
 
-        {query && (
+        {hasSearched && (query || isAdvancedSearchActive) && (
           <>
             {/* Search Info */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-foreground mb-2">
                 Search Results for &quot;{query}&quot;
               </h1>
+              {isAdvancedSearchActive && (
+                <div className="mb-2 p-3 bg-secondary/20 rounded-lg">
+                  <p className="text-sm font-medium text-foreground mb-1">Advanced Search Applied:</p>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    {advancedCriteria.length > 0 && (
+                      <div>
+                        <span className="font-medium">Criteria:</span> {advancedCriteria.map(c => `${c.field}: "${c.value}"`).join(' AND ')}
+                      </div>
+                    )}
+                    {advancedFilters.format !== 'all' && (
+                      <div>
+                        <span className="font-medium">Format:</span> {advancedFilters.format}
+                      </div>
+                    )}
+                    {(advancedFilters.yearFrom || advancedFilters.yearTo) && (
+                      <div>
+                        <span className="font-medium">Year:</span> {advancedFilters.yearFrom || '1900'} - {advancedFilters.yearTo || '2030'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               <p className="text-muted-foreground">
-                {isLoading ? 'Searching...' : `Found ${sortedResults.length} results`}
+                {isLoading ? 'Searching...' : (() => {
+                  const totalResults = sortedResults.length
+                  const startIndex = (currentPage - 1) * resultsPerPage + 1
+                  const endIndex = Math.min(currentPage * resultsPerPage, totalResults)
+                  
+                  if (totalResults === 0) {
+                    return 'No results found'
+                  } else if (totalResults <= resultsPerPage) {
+                    return `Showing ${totalResults} of ${totalResults} Results`
+                  } else {
+                    return `Showing ${startIndex}-${endIndex} of ${totalResults} Results`
+                  }
+                })()}
               </p>
             </div>
 
@@ -94,26 +197,27 @@ export default function SearchPage() {
                     {/* Sort Options */}
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-foreground">Sort by:</span>
-                      <div className="flex gap-1">
-                        {(['relevance', 'date', 'citations', 'downloads'] as SortOption[]).map((option) => (
-                          <button
-                            key={option}
-                            onClick={() => handleSortChange(option)}
-                            className={`px-3 py-1 text-sm rounded-md transition-colors flex items-center gap-1 ${
-                              sortBy === option
-                                ? 'bg-primary text-primary-foreground'
-                                : 'hover:bg-secondary'
-                            }`}
-                          >
-                            {option}
-                            {sortBy === option && (
-                              sortDirection === 'asc' ? 
-                                <SortAsc className="w-3 h-3" /> : 
-                                <SortDesc className="w-3 h-3" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                      <Select value={sortBy} onValueChange={(value) => handleSortChange(value as SortOption)}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Select sort option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="relevance">Relevance</SelectItem>
+                          <SelectItem value="date">Date</SelectItem>
+                          <SelectItem value="citations">Citations</SelectItem>
+                          <SelectItem value="downloads">Downloads</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <button
+                        onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+                        className="p-2 hover:bg-secondary rounded-md transition-colors"
+                        title={`Sort ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
+                      >
+                        {sortDirection === 'asc' ? 
+                          <SortAsc className="w-4 h-4" /> : 
+                          <SortDesc className="w-4 h-4" />
+                        }
+                      </button>
                     </div>
                   </div>
 

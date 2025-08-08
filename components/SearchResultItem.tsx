@@ -10,6 +10,23 @@ interface SearchResultItemProps {
   currentSearchQuery?: string
 }
 
+// Helper function to highlight search terms
+const highlightText = (text: string, searchQuery: string) => {
+  if (!searchQuery || !text) return text
+  
+  const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 0)
+  if (searchTerms.length === 0) return text
+  
+  let highlightedText = text
+  
+  searchTerms.forEach(term => {
+    const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    highlightedText = highlightedText.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">$1</mark>')
+  })
+  
+  return highlightedText
+}
+
 const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSearchQuery }) => {
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
@@ -74,15 +91,21 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
               className="block group"
             >
               <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
-                {result.title}
+                <span dangerouslySetInnerHTML={{ 
+                  __html: highlightText(result.title, currentSearchQuery || '') 
+                }} />
               </h3>
             </Link>
             <p className="text-sm text-muted-foreground mb-2">
-              By {formatAuthors(result.authors)}
+              By <span dangerouslySetInnerHTML={{ 
+                __html: highlightText(formatAuthors(result.authors), currentSearchQuery || '') 
+              }} />
             </p>
             {(result.journal || result.publisher) && (
               <p className="text-sm text-muted-foreground mb-3">
-                Published in <span className="font-medium">{result.journal || result.publisher}</span>
+                Published in <span className="font-medium" dangerouslySetInnerHTML={{ 
+                  __html: highlightText(result.journal || result.publisher || '', currentSearchQuery || '') 
+                }} />
               </p>
             )}
           </div>
@@ -91,7 +114,9 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
 
       {/* Description */}
       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-        {result.description}
+        <span dangerouslySetInnerHTML={{ 
+          __html: highlightText(result.description, currentSearchQuery || '') 
+        }} />
       </p>
 
       {/* Tags */}

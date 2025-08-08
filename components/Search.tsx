@@ -2,8 +2,18 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search as SearchIcon, X, FileText, Book, GraduationCap } from 'lucide-react'
+import { Search as SearchIcon, X, FileText, Book, GraduationCap, Settings } from 'lucide-react'
 import { getSearchSuggestions, type MockResult } from '@/services'
+import AdvancedSearchModal from './AdvancedSearchModal'
+import { useAtom } from 'jotai'
+import { 
+  searchQueryAtom, 
+  advancedSearchCriteriaAtom, 
+  advancedSearchFiltersAtom,
+  searchLoadingAtom,
+  type SearchCriteria,
+  type AdvancedSearchFilters
+} from '@/atoms/searchAtoms'
 
 interface SearchProps {
   placeholder?: string
@@ -18,10 +28,15 @@ const Search: React.FC<SearchProps> = ({
   className = "",
   initialQuery
 }) => {
-  const [query, setQuery] = useState(initialQuery || '')
-  const [isLoading, setIsLoading] = useState(false)
+  const [query, setQuery] = useAtom(searchQueryAtom)
+  const [isLoading, setIsLoading] = useAtom(searchLoadingAtom)
+  const [advancedCriteria, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
+  
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [isFocused, setIsFocused] = useState(false)
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
+  
   const router = useRouter()
   const searchParams = useSearchParams()
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -34,7 +49,27 @@ const Search: React.FC<SearchProps> = ({
     } else if (urlQuery) {
       setQuery(urlQuery)
     }
-  }, [searchParams, initialQuery]) // Removed 'query' from dependencies to avoid conflicts
+
+    // Parse advanced search parameters from URL
+    const criteriaParam = searchParams?.get('criteria')
+    const filtersParam = searchParams?.get('filters')
+    
+    if (criteriaParam) {
+      try {
+        setAdvancedCriteria(JSON.parse(decodeURIComponent(criteriaParam)))
+      } catch (e) {
+        console.error('Failed to parse criteria from URL:', e)
+      }
+    }
+    
+    if (filtersParam) {
+      try {
+        setAdvancedFilters(JSON.parse(decodeURIComponent(filtersParam)))
+      } catch (e) {
+        console.error('Failed to parse filters from URL:', e)
+      }
+    }
+  }, [searchParams, initialQuery, setQuery, setAdvancedCriteria, setAdvancedFilters])
 
     // Filter search suggestions based on query
   const filteredResults = useMemo(() => {
@@ -70,13 +105,46 @@ const Search: React.FC<SearchProps> = ({
 
     setIsLoading(true)
     
+    // Reset advanced search filters - don't add keyword criteria for basic search
+    // setAdvancedCriteria([])
+    setAdvancedFilters({
+      yearFrom: '',
+      yearTo: '',
+      format: 'all',
+      language: 'all'
+    })
+    
     // Navigate to search page with query parameter
     const searchParams = new URLSearchParams()
     searchParams.set('q', searchQuery.trim())
     router.push(`/search?${searchParams.toString()}`)
     
     setIsLoading(false)
-  }, [router])
+  }, [router, setIsLoading, setAdvancedCriteria, setAdvancedFilters])
+
+  const handleAdvancedSearch = useCallback((criteria: SearchCriteria[], filters: AdvancedSearchFilters) => {
+    setIsLoading(true)
+    
+    // Navigate to search page with advanced search parameters
+    const searchParams = new URLSearchParams()
+    
+    // Add basic query if available
+    if (query.trim()) {
+      searchParams.set('q', query.trim())
+    }
+    
+    // Add advanced search parameters
+    if (criteria.length > 0) {
+      searchParams.set('criteria', encodeURIComponent(JSON.stringify(criteria)))
+    }
+    
+    if (filters) {
+      searchParams.set('filters', encodeURIComponent(JSON.stringify(filters)))
+    }
+    
+    router.push(`/search?${searchParams.toString()}`)
+    setIsLoading(false)
+  }, [router, query, setIsLoading])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -250,6 +318,17 @@ const Search: React.FC<SearchProps> = ({
         )}
       </form>
 
+      {/* Advanced Search Link */}
+      <div className="mt-2 flex justify-end">
+        <button
+          onClick={() => setIsAdvancedSearchOpen(true)}
+          className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+        >
+          <Settings className="w-4 h-4" />
+          Advanced Search
+        </button>
+      </div>
+
       {/* Quick Search Tips */}
       <div className="mt-4 flex flex-wrap gap-2 justify-center">
         <span className="text-sm text-muted-foreground">Try:</span>
@@ -263,6 +342,16 @@ const Search: React.FC<SearchProps> = ({
           </button>
         ))}
       </div>
+
+      {/* Advanced Search Modal */}
+      <AdvancedSearchModal
+        isOpen={isAdvancedSearchOpen}
+        onClose={() => setIsAdvancedSearchOpen(false)}
+        onSearch={handleAdvancedSearch}
+        initialCriteria={advancedCriteria}
+        initialFilters={advancedFilters}
+        mainSearchQuery={query}
+      />
     </div>
   )
 }
