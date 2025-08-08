@@ -1,3 +1,5 @@
+import { httpService, type SuggestionParams, type ApiResponse } from './httpService'
+
 export interface MockResult {
   id: string
   title: string
@@ -209,16 +211,28 @@ export const mockSuggestionsDatabase: MockResult[] = [
   }
 ]
 
-export const getSearchSuggestions = (query: string, limit: number = 5): MockResult[] => {
-  if (!query.trim()) return []
+export const getSearchSuggestions = async (query: string, limit: number = 5): Promise<MockResult[]> => {
+  try {
+    if (!query.trim()) return []
 
-  const searchTerm = query.toLowerCase()
-  return mockSuggestionsDatabase
-    .filter(result =>
-      result.title.toLowerCase().includes(searchTerm) ||
-      result.authors.some(author => author.toLowerCase().includes(searchTerm)) ||
-      result.journal?.toLowerCase().includes(searchTerm) ||
-      result.publisher?.toLowerCase().includes(searchTerm)
-    )
-    .slice(0, limit)
+    const params: SuggestionParams = { query: query.trim(), limit }
+    
+    // Filter mock data based on query
+    const searchTerm = query.toLowerCase()
+    const filteredSuggestions = mockSuggestionsDatabase
+      .filter(result =>
+        result.title.toLowerCase().includes(searchTerm) ||
+        result.authors.some(author => author.toLowerCase().includes(searchTerm)) ||
+        result.journal?.toLowerCase().includes(searchTerm) ||
+        result.publisher?.toLowerCase().includes(searchTerm)
+      )
+      .slice(0, limit)
+
+    const response: ApiResponse<MockResult[]> = await httpService.getSearchSuggestions(params, filteredSuggestions)
+    return response.data
+  } catch (error) {
+    console.error('Error getting search suggestions:', error)
+    // Return empty array on error
+    return []
+  }
 }

@@ -1,4 +1,5 @@
 import type { DetailResource } from '@/models'
+import { httpService, type DetailParams, type ApiResponse } from './httpService'
 
 // Extended mock data for detail view
 export const mockDetailResources: DetailResource[] = [
@@ -178,6 +179,22 @@ export const mockDetailResources: DetailResource[] = [
   }
 ]
 
-export const getDetailResource = (id: string): DetailResource | undefined => {
-  return mockDetailResources.find(resource => resource.id === id)
+export const getDetailResource = async (id: string): Promise<DetailResource | undefined> => {
+  try {
+    const params: DetailParams = { id }
+    
+    // Find mock data based on id
+    const resource = mockDetailResources.find(resource => resource.id === id)
+    
+    if (!resource) {
+      return undefined
+    }
+
+    const response: ApiResponse<DetailResource> = await httpService.getResourceDetail(params, resource)
+    return response.data
+  } catch (error) {
+    console.error('Error getting detail resource:', error)
+    // Return undefined on error
+    return undefined
+  }
 }

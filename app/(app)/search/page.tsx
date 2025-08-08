@@ -8,6 +8,7 @@ import SearchResultItem from '@/components/SearchResultItem'
 import LoadingSkeletonItem from '@/components/LoadingSkeletonItem'
 import { Grid, List, SortAsc, SortDesc } from 'lucide-react'
 import { searchResources, sortSearchResults, type SortOption, type SortDirection } from '@/services'
+import type { SearchResult } from '@/models'
 import {
   Select,
   SelectContent,
@@ -72,34 +73,55 @@ export default function SearchPage() {
     }
   }, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters])
 
-  // Filter results based on search query and advanced criteria
-  const filteredResults = useMemo(() => {
-    let results = searchResources(query)
-    
-    // Apply advanced search filters if present
-    if (advancedFilters.format !== 'all') {
-      results = results.filter(result => result.type === advancedFilters.format)
+  // State for search results
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [resultsLoading, setResultsLoading] = useState(false)
+
+  // Fetch search results
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!hasSearched || (!query && !isAdvancedSearchActive)) {
+        setSearchResults([])
+        return
+      }
+
+      setResultsLoading(true)
+      try {
+        let results = await searchResources(query)
+        
+        // Apply advanced search filters if present
+        if (advancedFilters.format !== 'all') {
+          results = results.filter(result => result.type === advancedFilters.format)
+        }
+        
+        // Note: Language filtering would need to be implemented based on actual data structure
+        // For now, we'll skip language filtering as it's not in the SearchResult model
+        
+        if (advancedFilters.yearFrom || advancedFilters.yearTo) {
+          results = results.filter(result => {
+            const year = result.year
+            const fromYear = advancedFilters.yearFrom ? parseInt(advancedFilters.yearFrom) : 1900
+            const toYear = advancedFilters.yearTo ? parseInt(advancedFilters.yearTo) : 2030
+            return year >= fromYear && year <= toYear
+          })
+        }
+        
+        setSearchResults(results)
+      } catch (error) {
+        console.error('Error fetching search results:', error)
+        setSearchResults([])
+      } finally {
+        setResultsLoading(false)
+      }
     }
-    
-    // Note: Language filtering would need to be implemented based on actual data structure
-    // For now, we'll skip language filtering as it's not in the SearchResult model
-    
-    if (advancedFilters.yearFrom || advancedFilters.yearTo) {
-      results = results.filter(result => {
-        const year = result.year
-        const fromYear = advancedFilters.yearFrom ? parseInt(advancedFilters.yearFrom) : 1900
-        const toYear = advancedFilters.yearTo ? parseInt(advancedFilters.yearTo) : 2030
-        return year >= fromYear && year <= toYear
-      })
-    }
-    
-    return results
-  }, [query, advancedFilters])
+
+    fetchResults()
+  }, [query, advancedFilters, hasSearched, isAdvancedSearchActive])
 
     // Sort results
   const sortedResults = useMemo(() => {
-    return sortSearchResults(filteredResults, sortBy, sortDirection, query)
-  }, [filteredResults, sortBy, sortDirection, query])
+    return sortSearchResults(searchResults, sortBy, sortDirection, query)
+  }, [searchResults, sortBy, sortDirection, query])
 
   // Paginate results
   const paginatedResults = useMemo(() => {
@@ -110,14 +132,10 @@ export default function SearchPage() {
 
   const totalPages = Math.ceil(sortedResults.length / resultsPerPage)
 
-  // Simulate loading when search changes
+  // Update loading state based on results loading
   useEffect(() => {
-    if (hasSearched && (query || isAdvancedSearchActive)) {
-      setIsLoading(true)
-      const timer = setTimeout(() => setIsLoading(false), 800)
-      return () => clearTimeout(timer)
-    }
-  }, [hasSearched, query, isAdvancedSearchActive])
+    setIsLoading(resultsLoading)
+  }, [resultsLoading])
 
   const handleSortChange = (newSortBy: SortOption) => {
     if (sortBy === newSortBy) {

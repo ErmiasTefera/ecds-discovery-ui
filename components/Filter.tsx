@@ -1,11 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
-import { ChevronDown, ChevronUp, X } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react'
 import { getFilters } from '@/services'
-import type { FilterOption } from '@/models'
-
-const mockFilters = getFilters()
+import type { FilterOption, FilterGroup } from '@/models'
 
 const Filter: React.FC = () => {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({})
@@ -17,6 +15,29 @@ const Filter: React.FC = () => {
     language: false
   })
   const [showMore, setShowMore] = useState<Record<string, boolean>>({})
+  const [filters, setFilters] = useState<FilterGroup[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  // Fetch filters
+  useEffect(() => {
+    const fetchFilters = async () => {
+      setLoading(true)
+      setError(false)
+      
+      try {
+        const filterData = await getFilters()
+        setFilters(filterData)
+      } catch (err) {
+        console.error('Error fetching filters:', err)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFilters()
+  }, [])
 
   const handleFilterChange = (groupId: string, optionId: string, checked: boolean) => {
     setSelectedFilters(prev => {
@@ -66,6 +87,27 @@ const Filter: React.FC = () => {
     return Object.values(selectedFilters).reduce((total, filters) => total + filters.length, 0)
   }
 
+  if (loading) {
+    return (
+      <div className="bg-background border border-border rounded-lg p-4">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Loading filters...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-background border border-border rounded-lg p-4">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Failed to load filters. Please try again.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-background border border-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -85,9 +127,9 @@ const Filter: React.FC = () => {
         <div className="mb-6">
           <h3 className="text-sm font-medium text-foreground mb-2">Active Filters</h3>
           <div className="flex flex-wrap gap-2">
-            {Object.entries(selectedFilters).map(([groupId, filters]) =>
-              filters.map(filterId => {
-                const group = mockFilters.find(g => g.id === groupId)
+            {Object.entries(selectedFilters).map(([groupId, filterIds]) =>
+              filterIds.map(filterId => {
+                const group = filters.find(g => g.id === groupId)
                 const option = group?.options.find(o => o.id === filterId)
                 if (!option) return null
 
@@ -113,7 +155,7 @@ const Filter: React.FC = () => {
 
       {/* Filter Groups */}
       <div className="space-y-4">
-        {mockFilters.map((group) => (
+        {filters.map((group) => (
           <div key={group.id} className="border-b border-border pb-4 last:border-b-0">
             <button
               onClick={() => toggleGroup(group.id)}

@@ -1,4 +1,5 @@
 import type { FilterGroup } from '@/models'
+import { httpService, type ApiResponse } from './httpService'
 
 export const mockFilters: FilterGroup[] = [
   {
@@ -66,6 +67,13 @@ export const mockFilters: FilterGroup[] = [
   }
 ]
 
-export const getFilters = (): FilterGroup[] => {
-  return mockFilters
+export const getFilters = async (): Promise<FilterGroup[]> => {
+  try {
+    const response: ApiResponse<FilterGroup[]> = await httpService.getFilters(mockFilters)
+    return response.data
+  } catch (error) {
+    console.error('Error getting filters:', error)
+    // Return empty array on error
+    return []
+  }
 }

@@ -72,8 +72,32 @@ const Search: React.FC<SearchProps> = ({
   }, [searchParams, initialQuery, setQuery, setAdvancedCriteria, setAdvancedFilters])
 
     // Filter search suggestions based on query
-  const filteredResults = useMemo(() => {
-    return getSearchSuggestions(query, 5)
+  const [filteredResults, setFilteredResults] = useState<MockResult[]>([])
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+
+  // Fetch search suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!query.trim()) {
+        setFilteredResults([])
+        return
+      }
+
+      setSuggestionsLoading(true)
+      try {
+        const suggestions = await getSearchSuggestions(query, 5)
+        setFilteredResults(suggestions)
+      } catch (error) {
+        console.error('Error fetching suggestions:', error)
+        setFilteredResults([])
+      } finally {
+        setSuggestionsLoading(false)
+      }
+    }
+
+    // Debounce the search suggestions
+    const timeoutId = setTimeout(fetchSuggestions, 300)
+    return () => clearTimeout(timeoutId)
   }, [query])
 
   // Reset selected index when results change

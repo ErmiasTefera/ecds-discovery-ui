@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye } from 'lucide-react'
+import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Sparkles, Loader2 } from 'lucide-react'
 import type { SearchResult } from '@/models'
+import { httpService } from '@/services/httpService'
 
 
 
@@ -28,6 +29,27 @@ const highlightText = (text: string, searchQuery: string) => {
 }
 
 const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSearchQuery }) => {
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
+  const [hasRequestedSummary, setHasRequestedSummary] = useState(false)
+
+  const handleGetAISummary = async () => {
+    if (hasRequestedSummary) return // Prevent multiple requests
+    
+    setIsLoadingSummary(true)
+    setHasRequestedSummary(true)
+    
+    try {
+      const response = await httpService.getAISummary(result.id)
+      if (response.success) {
+        setAiSummary(response.data.summary)
+      }
+    } catch (error) {
+      console.error('Failed to get AI summary:', error)
+    } finally {
+      setIsLoadingSummary(false)
+    }
+  }
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
       case 'article':
@@ -137,6 +159,38 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
           )}
         </div>
       )}
+
+      {/* AI Summary Section */}
+      <div className="mb-4">
+        {!hasRequestedSummary && (
+          <button
+            onClick={handleGetAISummary}
+            className="inline-flex items-center px-3 py-2 text-sm font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Get AI Summary
+          </button>
+        )}
+        
+        {isLoadingSummary && (
+          <div className="flex items-center space-x-2 p-3 bg-secondary/50 rounded-md">
+            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            <span className="text-sm text-muted-foreground">Generating AI summary...</span>
+          </div>
+        )}
+        
+        {aiSummary && (
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-md">
+            <div className="flex items-center space-x-2 mb-2">
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">AI Summary</span>
+            </div>
+            <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+              {aiSummary}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Metrics */}
       <div className="flex items-center justify-between">

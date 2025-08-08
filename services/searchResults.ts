@@ -1,4 +1,5 @@
 import type { SearchResult } from '@/models'
+import { httpService, type SearchParams, type ApiResponse } from './httpService'
 
 // Extended mock data for search results
 export const mockSearchResults: SearchResult[] = [
@@ -345,18 +346,31 @@ export const mockSearchResults: SearchResult[] = [
 export type SortOption = 'relevance' | 'date' | 'citations' | 'downloads'
 export type SortDirection = 'asc' | 'desc'
 
-export const searchResources = (query: string): SearchResult[] => {
-  if (!query.trim()) return mockSearchResults
+export const searchResources = async (query: string): Promise<SearchResult[]> => {
+  try {
+    const params: SearchParams = { query: query.trim() }
+    
+    // Filter mock data based on query
+    let filteredResults = mockSearchResults
+    if (query.trim()) {
+      const searchTerm = query.toLowerCase()
+      filteredResults = mockSearchResults.filter(result =>
+        result.title.toLowerCase().includes(searchTerm) ||
+        result.authors.some(author => author.toLowerCase().includes(searchTerm)) ||
+        result.description.toLowerCase().includes(searchTerm) ||
+        result.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+        result.journal?.toLowerCase().includes(searchTerm) ||
+        result.publisher?.toLowerCase().includes(searchTerm)
+      )
+    }
 
-  const searchTerm = query.toLowerCase()
-  return mockSearchResults.filter(result =>
-    result.title.toLowerCase().includes(searchTerm) ||
-    result.authors.some(author => author.toLowerCase().includes(searchTerm)) ||
-    result.description.toLowerCase().includes(searchTerm) ||
-    result.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
-    result.journal?.toLowerCase().includes(searchTerm) ||
-    result.publisher?.toLowerCase().includes(searchTerm)
-  )
+    const response: ApiResponse<SearchResult[]> = await httpService.searchResources(params, filteredResults)
+    return response.data
+  } catch (error) {
+    console.error('Error searching resources:', error)
+    // Return empty array on error, but in production you might want to show an error message
+    return []
+  }
 }
 
 export const sortSearchResults = (
