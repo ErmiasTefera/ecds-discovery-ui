@@ -74,8 +74,7 @@ const SignUpPage: React.FC = () => {
     
     if (!validateForm()) return
     
-    const { confirmPassword, ...signupData } = formData
-    await signup(signupData)
+    await signup({...formData})
   }
 
   const handleInputChange = (field: string, value: string) => {

@@ -4,7 +4,6 @@ import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Spar
 import { useAtom } from 'jotai'
 import type { SearchResult } from '@/models'
 import { httpService } from '@/services/httpService'
-import { isAuthenticatedAtom } from '@/atoms/authAtoms'
 import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
 
@@ -37,7 +36,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [hasRequestedSummary, setHasRequestedSummary] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
-  const [isAuthenticated] = useAtom(isAuthenticatedAtom)
+
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
 
   const handleGetAISummary = async () => {

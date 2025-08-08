@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { X, Plus } from 'lucide-react'
 import {
   Select,
@@ -22,7 +22,6 @@ interface AdvancedSearchModalProps {
   isOpen: boolean
   onClose: () => void
   onSearch: (criteria: SearchCriteria[], filters: AdvancedSearchFilters) => void
-  initialCriteria?: SearchCriteria[]
   initialFilters?: AdvancedSearchFilters
   mainSearchQuery?: string
 }
@@ -31,7 +30,6 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   isOpen,
   onClose,
   onSearch,
-  initialCriteria = [],
   initialFilters = {
     yearFrom: '',
     yearTo: '',

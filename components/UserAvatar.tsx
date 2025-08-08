@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { ChevronDown, LogOut, User, Settings } from 'lucide-react'
 import { userAtom, logoutAtom } from '@/atoms/authAtoms'
+import Image from 'next/image'
 
 const UserAvatar: React.FC = () => {
   const [user] = useAtom(userAtom)
@@ -51,9 +52,11 @@ const UserAvatar: React.FC = () => {
         {/* Avatar */}
         <div className="relative">
           {user.avatar ? (
-            <img
+            <Image
               src={user.avatar}
               alt={user.name}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full object-cover border-2 border-border"
             />
           ) : (

@@ -21,9 +21,7 @@ import {
   searchQueryAtom,
   advancedSearchCriteriaAtom, 
   advancedSearchFiltersAtom,
-  isAdvancedSearchActiveAtom,
-  type SearchCriteria,
-  type AdvancedSearchFilters
+  isAdvancedSearchActiveAtom
 } from '@/atoms/searchAtoms'
 
 

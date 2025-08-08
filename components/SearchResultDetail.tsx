@@ -20,7 +20,6 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import type { DetailResource } from '@/models'
-import { isAuthenticatedAtom } from '@/atoms/authAtoms'
 import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
 
@@ -37,7 +36,7 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
-  const [isAuthenticated] = useAtom(isAuthenticatedAtom)
+
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
 
   const getTypeIcon = (type: DetailResource['type']) => {

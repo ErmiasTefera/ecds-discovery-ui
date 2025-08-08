@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search as SearchIcon, X, FileText, Book, GraduationCap, Settings } from 'lucide-react'
 import { getSearchSuggestions, type MockResult } from '@/services'
@@ -30,7 +30,7 @@ const Search: React.FC<SearchProps> = ({
 }) => {
   const [query, setQuery] = useAtom(searchQueryAtom)
   const [isLoading, setIsLoading] = useAtom(searchLoadingAtom)
-  const [advancedCriteria, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
   const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
   
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -73,7 +73,6 @@ const Search: React.FC<SearchProps> = ({
 
     // Filter search suggestions based on query
   const [filteredResults, setFilteredResults] = useState<MockResult[]>([])
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
 
   // Fetch search suggestions
   useEffect(() => {
@@ -83,15 +82,12 @@ const Search: React.FC<SearchProps> = ({
         return
       }
 
-      setSuggestionsLoading(true)
       try {
         const suggestions = await getSearchSuggestions(query, 5)
         setFilteredResults(suggestions)
       } catch (error) {
         console.error('Error fetching suggestions:', error)
         setFilteredResults([])
-      } finally {
-        setSuggestionsLoading(false)
       }
     }
 
@@ -144,7 +140,7 @@ const Search: React.FC<SearchProps> = ({
     router.push(`/search?${searchParams.toString()}`)
     
     setIsLoading(false)
-  }, [router, setIsLoading, setAdvancedCriteria, setAdvancedFilters])
+  }, [router, setIsLoading, setAdvancedFilters])
 
   const handleAdvancedSearch = useCallback((criteria: SearchCriteria[], filters: AdvancedSearchFilters) => {
     setIsLoading(true)
@@ -372,7 +368,6 @@ const Search: React.FC<SearchProps> = ({
         isOpen={isAdvancedSearchOpen}
         onClose={() => setIsAdvancedSearchOpen(false)}
         onSearch={handleAdvancedSearch}
-        initialCriteria={advancedCriteria}
         initialFilters={advancedFilters}
         mainSearchQuery={query}
       />
