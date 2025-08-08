@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, Globe, Search } from 'lucide-react'
 import ThemeToggle from '@/components/ThemeToggle'
+import UserAvatar from '@/components/UserAvatar'
+import AuthButtons from '@/components/AuthButtons'
 
 interface Language {
   code: string
@@ -129,6 +131,10 @@ const TopNavigation: React.FC = () => {
             {/* Theme Toggle */}
             <ThemeToggle />
 
+            {/* Authentication */}
+            <UserAvatar />
+            <AuthButtons />
+
             {/* Mobile Menu Button */}
             <button 
               className="md:hidden ml-3 p-2 rounded-md hover:bg-secondary transition-colors"
@@ -170,6 +176,11 @@ const TopNavigation: React.FC = () => {
             >
               Help
             </Link>
+            
+            {/* Mobile Authentication */}
+            <div className="border-t border-border pt-2 mt-2">
+              <AuthButtons />
+            </div>
           </div>
         </div>
       </div>

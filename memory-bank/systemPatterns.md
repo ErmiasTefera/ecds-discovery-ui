@@ -13,6 +13,26 @@ export const searchQueryAtom = atom<string>('')
 export const advancedSearchCriteriaAtom = atom<SearchCriteria[]>([])
 export const advancedSearchFiltersAtom = atom<AdvancedSearchFilters>({...})
 
+// Authentication atoms
+export const authStateAtom = atom<AuthState>({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null
+})
+
+export const userAtom = atom(
+  (get) => get(authStateAtom).user,
+  (get, set, user: User | null) => {
+    const currentState = get(authStateAtom)
+    set(authStateAtom, {
+      ...currentState,
+      user,
+      isAuthenticated: !!user
+    })
+  }
+)
+
 // Derived atoms for computed state
 export const isAdvancedSearchActiveAtom = atom((get) => {
   const criteria = get(advancedSearchCriteriaAtom)
@@ -43,11 +63,56 @@ export const ensureMinimumCriteria = (criteria: SearchCriteria[]): SearchCriteri
 const [query, setQuery] = useAtom(searchQueryAtom)
 const [isAdvancedActive] = useAtom(isAdvancedSearchActiveAtom)
 
+// Authentication state integration
+const [user] = useAtom(userAtom)
+const [isAuthenticated] = useAtom(isAuthenticatedAtom)
+const [, login] = useAtom(loginAtom)
+
 // Reactive updates across components
 // Changes in one component automatically update others
 ```
 
 ## Component Patterns
+
+### Authentication Component Pattern
+```typescript
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [, initializeAuth] = useAtom(initializeAuthAtom)
+
+  useEffect(() => {
+    // Initialize auth state from localStorage on app load
+    initializeAuth()
+  }, [initializeAuth])
+
+  return <>{children}</>
+}
+
+const UserAvatar: React.FC = () => {
+  const [user] = useAtom(userAtom)
+  const [, logout] = useAtom(logoutAtom)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    setIsDropdownOpen(false)
+  }
+
+  if (!user) return null
+
+  return (
+    <div className="relative">
+      <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+        {/* Avatar and user info */}
+      </button>
+      {isDropdownOpen && (
+        <div className="dropdown-menu">
+          {/* Menu items */}
+        </div>
+      )}
+    </div>
+  )
+}
+```
 
 ### Search Component Pattern
 ```typescript
@@ -155,6 +220,15 @@ const SearchPage = () => {
 
 ## Data Flow Patterns
 
+### Authentication Flow Architecture
+```
+App Load → AuthProvider → Initialize Auth → Check localStorage → Restore User State
+     ↓
+User Login → Auth Atoms → Update State → Store in localStorage → Update UI
+     ↓
+User Logout → Clear State → Remove from localStorage → Update UI
+```
+
 ### Search Flow Architecture
 ```
 User Input → Jotai State Update → URL Sync → Search Trigger → Results Display
@@ -227,6 +301,36 @@ const highlightText = (text: string, searchQuery: string) => {
 ```
 
 ## Error Handling Patterns
+
+### Authentication Error Handling Pattern
+```typescript
+// Form validation with error handling
+const validateForm = () => {
+  const errors: Record<string, string> = {}
+  
+  if (!formData.email.trim()) {
+    errors.email = 'Email is required'
+  } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    errors.email = 'Please enter a valid email address'
+  }
+  
+  setFormErrors(errors)
+  return Object.keys(errors).length === 0
+}
+
+// Auth state error handling
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  
+  if (!validateForm()) return
+  
+  try {
+    await login(formData)
+  } catch (error) {
+    setAuthError(error instanceof Error ? error.message : 'Login failed')
+  }
+}
+```
 
 ### Graceful Degradation Pattern
 ```typescript
