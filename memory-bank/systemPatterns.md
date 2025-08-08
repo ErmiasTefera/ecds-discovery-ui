@@ -1,249 +1,417 @@
 # System Patterns: Discovery UI
 
 ## Architecture Overview
-Discovery UI follows Next.js App Router patterns with a comprehensive component-based architecture emphasizing modularity, reusability, type safety, and professional code organization. The application implements advanced patterns for theme management, state persistence, and scholarly resource discovery.
 
-## Project Structure Architecture
+The Discovery UI follows a modern React/Next.js architecture with clear separation of concerns, centralized state management, and professional component patterns.
 
-### Organized Directory Structure
-```
-discovery-ui/
-├── app/
-│   ├── (app)/                    # Route group for main application
-│   │   ├── page.tsx             # Landing page (/)
-│   │   ├── search/page.tsx      # Search results (/search)
-│   │   ├── detail/[resourceId]/ # Resource detail (/detail/[id])
-│   │   └── layout.tsx           # App-specific layout with navigation
-│   ├── layout.tsx               # Root layout with theme provider
-│   └── globals.css              # Global styles with CSS variables
-├── components/                   # Reusable UI components
-├── layout/                      # Layout-specific components
-├── models/                      # TypeScript interfaces and types
-├── services/                    # Business logic and mock data
-├── contexts/                    # React Context providers
-├── hooks/                       # Custom React hooks
-├── lib/                         # Utility functions
-└── utils/                       # Helper functions
-```
+## State Management Patterns
 
-### Code Organization Patterns
-- **Models**: Centralized TypeScript interfaces with barrel exports
-- **Services**: Business logic separation with data services and utilities
-- **Components**: Focused, reusable UI components with single responsibilities
-- **Contexts**: Global state management for themes and cross-cutting concerns
-- **Hooks**: Custom React hooks for reusable logic
+### Jotai Atoms Architecture
+```typescript
+// Centralized state atoms
+export const searchQueryAtom = atom<string>('')
+export const advancedSearchCriteriaAtom = atom<SearchCriteria[]>([])
+export const advancedSearchFiltersAtom = atom<AdvancedSearchFilters>({...})
 
-## Component Architecture
+// Derived atoms for computed state
+export const isAdvancedSearchActiveAtom = atom((get) => {
+  const criteria = get(advancedSearchCriteriaAtom)
+  const filters = get(advancedSearchFiltersAtom)
+  const query = get(searchQueryAtom)
+  
+  // Check if there are non-keyword criteria
+  const hasNonKeywordCriteria = criteria.some(criteria => 
+    criteria.field !== 'keyword' || criteria.value !== query
+  )
+  
+  // Check if there are filters applied
+  const hasFilters = filters.format !== 'all' || filters.yearFrom || filters.yearTo
+  
+  return hasNonKeywordCriteria || hasFilters
+})
 
-### Component Hierarchy
-```
-App Layout
-├── TopNavigation (sticky)
-│   ├── Branding (logo + title)
-│   ├── Navigation Links
-│   ├── Language Switcher
-│   ├── Theme Toggle
-│   └── Mobile Menu
-├── Main Content (flexible)
-│   ├── Landing Page
-│   │   ├── Hero Section
-│   │   ├── Search Component
-│   │   ├── Feature Showcase
-│   │   └── Call-to-Action
-│   ├── Search Page
-│   │   ├── Search Component
-│   │   ├── Filter Sidebar
-│   │   ├── Results Display
-│   │   └── Pagination
-│   └── Detail Page
-│       ├── Breadcrumbs
-│       ├── Resource Header
-│       ├── Tabbed Interface
-│       └── Action Buttons
-└── Footer (sticky)
-    ├── Branding
-    ├── Quick Links
-    ├── Resources
-    └── Contact Info
+// Helper functions for state operations
+export const ensureMinimumCriteria = (criteria: SearchCriteria[]): SearchCriteria[] => {
+  // Ensure minimum 3 rows and sort by content
+  // Non-empty values first, then empty ones
+}
 ```
 
-### Component Design Patterns
-- **Functional Components**: All components use React function syntax with TypeScript
-- **Props Interfaces**: Comprehensive typing for all component props
-- **Composition Over Inheritance**: Components built from smaller, focused parts
-- **Single Responsibility**: Each component has one clear purpose
-- **Barrel Exports**: Clean import statements with index.ts files
+### Component State Integration
+```typescript
+// Using atoms in components
+const [query, setQuery] = useAtom(searchQueryAtom)
+const [isAdvancedActive] = useAtom(isAdvancedSearchActiveAtom)
 
-## State Management Architecture
-
-### Multi-Level State Strategy
-1. **Global State (React Context)**
-   - Theme preferences (light/dark mode)
-   - User settings and preferences
-   - Cross-component shared state
-
-2. **URL State (Next.js Router)**
-   - Search queries and parameters
-   - Filter selections
-   - Page navigation state
-   - Deep linking support
-
-3. **Component State (React useState)**
-   - UI interactions (dropdowns, focus states)
-   - Form inputs and validation
-   - Loading states and error handling
-
-4. **Derived State (React useMemo)**
-   - Computed search results
-   - Filtered and sorted data
-   - Performance optimization
-
-### State Persistence Patterns
-- **Theme State**: Local storage with system preference detection
-- **Search State**: URL parameters for deep linking and browser navigation
-- **UI State**: Session-based persistence for better UX
-- **Form State**: Optimistic updates with error recovery
-
-## Data Flow Architecture
-
-### Search Flow Pattern
+// Reactive updates across components
+// Changes in one component automatically update others
 ```
-User Input → Debounced Search → URL Update → Service Call → Results Display
+
+## Component Patterns
+
+### Search Component Pattern
+```typescript
+const Search: React.FC<SearchProps> = ({ initialQuery }) => {
+  // Jotai state integration
+  const [query, setQuery] = useAtom(searchQueryAtom)
+  const [isLoading, setIsLoading] = useAtom(searchLoadingAtom)
+  
+  // Local UI state
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [isFocused, setIsFocused] = useState(false)
+  
+  // URL synchronization
+  useEffect(() => {
+    const urlQuery = searchParams?.get('q') || ''
+    if (initialQuery !== undefined) {
+      setQuery(initialQuery)
+    } else if (urlQuery) {
+      setQuery(urlQuery)
+    }
+  }, [searchParams, initialQuery, setQuery])
+  
+  // Search handlers
+  const handleSearch = useCallback(async (searchQuery: string) => {
+    // Reset advanced search filters
+    // Navigate to search page
+  }, [router, setIsLoading, setAdvancedCriteria, setAdvancedFilters])
+}
+```
+
+### Advanced Search Modal Pattern
+```typescript
+const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
+  isOpen, onClose, onSearch, mainSearchQuery
+}) => {
+  // Jotai state integration
+  const [searchCriteria, setSearchCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [filters, setFilters] = useAtom(advancedSearchFiltersAtom)
+  
+  // Initialization tracking to prevent infinite loops
+  const hasInitialized = React.useRef(false)
+  
+  // Smart initialization with main search query
+  useEffect(() => {
+    if (isOpen && !hasInitialized.current) {
+      let criteria = searchCriteria.length > 0 ? searchCriteria : []
+      
+      // Use main search query as keyword if no criteria
+      if (criteria.length === 0 && mainSearchQuery.trim()) {
+        criteria = [
+          { field: 'keyword', value: mainSearchQuery.trim(), operator: 'AND' },
+          { field: 'title', value: '', operator: 'AND' },
+          { field: 'author', value: '', operator: 'AND' }
+        ]
+      }
+      
+      // Ensure minimum 3 rows and sort by content
+      const processedCriteria = ensureMinimumCriteria(criteria)
+      setSearchCriteria(processedCriteria)
+      setFilters(initialFilters)
+      
+      hasInitialized.current = true
+    }
+    
+    // Reset initialization flag when modal closes
+    if (!isOpen) {
+      hasInitialized.current = false
+    }
+  }, [isOpen, mainSearchQuery, searchCriteria, setSearchCriteria, setFilters, initialFilters])
+}
+```
+
+### Search Results Pattern
+```typescript
+const SearchPage = () => {
+  // Jotai state integration
+  const [query, setQuery] = useAtom(searchQueryAtom)
+  const [advancedCriteria, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
+  const [isAdvancedSearchActive] = useAtom(isAdvancedSearchActiveAtom)
+  
+  // Local search state
+  const [hasSearched, setHasSearched] = useState(false)
+  
+  // URL parameter parsing and state sync
+  useEffect(() => {
+    const urlQuery = searchParams?.get('q') || ''
+    setQuery(urlQuery)
+    
+    const criteriaParam = searchParams?.get('criteria')
+    const filtersParam = searchParams?.get('filters')
+    
+    // Set hasSearched to true if there are search parameters
+    if (urlQuery || criteriaParam || filtersParam) {
+      setHasSearched(true)
+    }
+    
+    // Parse and set advanced search parameters
+  }, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters])
+  
+  // Controlled result display
+  const shouldShowResults = hasSearched && (query || isAdvancedSearchActive)
+}
+```
+
+## Data Flow Patterns
+
+### Search Flow Architecture
+```
+User Input → Jotai State Update → URL Sync → Search Trigger → Results Display
      ↓
-URL State ← Filter Updates ← User Selections ← Filter UI
-     ↓
-Deep Link ← Browser Navigation ← Back/Forward ← History API
+Advanced Search ← Modal State ← Criteria Management ← Filter Application
 ```
 
-### Navigation Flow Pattern
+### State Synchronization Pattern
+```typescript
+// URL ↔ Jotai State synchronization
+useEffect(() => {
+  // Parse URL parameters
+  const urlQuery = searchParams?.get('q') || ''
+  const criteriaParam = searchParams?.get('criteria')
+  const filtersParam = searchParams?.get('filters')
+  
+  // Update Jotai atoms
+  setQuery(urlQuery)
+  if (criteriaParam) {
+    setAdvancedCriteria(JSON.parse(decodeURIComponent(criteriaParam)))
+  }
+  if (filtersParam) {
+    setAdvancedFilters(JSON.parse(decodeURIComponent(filtersParam)))
+  }
+}, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters])
 ```
-Landing Page
-    ↓ (search query)
-Search Results Page
-    ↓ (resource selection)
-Detail Page
-    ↓ (back navigation with context)
-Search Results Page (preserved state)
+
+## UI Component Patterns
+
+### shadcn/ui Integration Pattern
+```typescript
+// Select component usage
+<Select value={criteria.field} onValueChange={(value) => updateCriteria(index, 'field', value)}>
+  <SelectTrigger className="w-24">
+    <SelectValue />
+  </SelectTrigger>
+  <SelectContent>
+    {fieldOptions.map((option) => (
+      <SelectItem key={option.value} value={option.value}>
+        {option.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
 ```
 
-### Theme Flow Pattern
+### Search Term Highlighting Pattern
+```typescript
+// Helper function for highlighting
+const highlightText = (text: string, searchQuery: string) => {
+  if (!searchQuery || !text) return text
+  
+  const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 0)
+  if (searchTerms.length === 0) return text
+  
+  let highlightedText = text
+  
+  searchTerms.forEach(term => {
+    const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    highlightedText = highlightedText.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">$1</mark>')
+  })
+  
+  return highlightedText
+}
+
+// Usage in components
+<span dangerouslySetInnerHTML={{ 
+  __html: highlightText(result.title, currentSearchQuery || '') 
+}} />
 ```
-System Detection → Theme Context → CSS Variables → Component Styling
-       ↓
-Local Storage ← User Selection ← Theme Toggle ← UI Interaction
-```
-
-## Component Communication Patterns
-
-### Props Down, Events Up
-- **Data Flow**: Props passed down component hierarchy
-- **Event Handling**: Callbacks and event handlers bubble up
-- **State Lifting**: Shared state managed at appropriate level
-- **Context Usage**: Global state for cross-cutting concerns
-
-### Search Context Preservation
-- **URL Parameters**: Search queries maintained in URL
-- **Navigation State**: Back navigation preserves search context
-- **Deep Linking**: Shareable URLs with complete state
-- **Browser Integration**: History API for native navigation
-
-## UI/UX Patterns
-
-### Design System Implementation
-- **CSS Variables**: Theme-aware color system
-- **Tailwind Utilities**: Consistent spacing and typography
-- **Component Variants**: Type-safe styling with class-variance-authority
-- **Responsive Design**: Mobile-first breakpoint strategy
-- **Accessibility**: WCAG 2.1 compliance with ARIA labels
-
-### Interaction Patterns
-- **Progressive Enhancement**: Core functionality without JavaScript
-- **Keyboard Navigation**: Full keyboard accessibility
-- **Loading States**: Skeleton components during async operations
-- **Error Boundaries**: Graceful error handling and recovery
-- **Smooth Transitions**: Animated state changes and theme switching
-
-### Search Experience Patterns
-- **Type-ahead Suggestions**: Live search with keyboard navigation
-- **Faceted Filtering**: Multi-criteria filtering with visual feedback
-- **Result Highlighting**: Search term emphasis in results
-- **Contextual Actions**: Relevant actions based on resource type
-- **Breadcrumb Navigation**: Clear navigation context
-
-## Performance Patterns
-
-### Optimization Strategies
-- **Code Splitting**: Route-based splitting with Next.js App Router
-- **Lazy Loading**: Dynamic imports for heavy components
-- **Memoization**: React.memo and useMemo for expensive computations
-- **Bundle Optimization**: Tree shaking and dead code elimination
-
-### Loading Performance
-- **Skeleton Loading**: Maintains layout during data fetching
-- **Progressive Loading**: Results appear as they're received
-- **Debounced Search**: Prevents excessive API calls
-- **Caching Strategy**: Strategic caching of search results
-
-### Theme Performance
-- **CSS Variables**: Efficient theme switching without re-renders
-- **Hydration Safety**: Prevents layout shift during theme initialization
-- **System Detection**: Respects user's OS preferences
-- **Transition Optimization**: Smooth animations without performance impact
 
 ## Error Handling Patterns
 
-### Graceful Degradation
-- **Context Fallbacks**: Default values when context unavailable
-- **Service Errors**: Fallback UI when services fail
-- **Network Errors**: Offline state and retry mechanisms
-- **Type Safety**: TypeScript prevents runtime type errors
+### Graceful Degradation Pattern
+```typescript
+// URL parameter parsing with error handling
+if (criteriaParam) {
+  try {
+    setAdvancedCriteria(JSON.parse(decodeURIComponent(criteriaParam)))
+  } catch (e) {
+    console.error('Failed to parse criteria from URL:', e)
+  }
+}
+```
 
-### User Feedback Patterns
-- **Loading States**: Clear indicators during async operations
-- **Error Messages**: Helpful, actionable error descriptions
-- **Empty States**: Guidance when no content is available
-- **Success Feedback**: Confirmation of user actions
+### State Conflict Prevention Pattern
+```typescript
+// Initialization tracking to prevent infinite loops
+const hasInitialized = React.useRef(false)
 
-## Security Patterns
+useEffect(() => {
+  if (isOpen && !hasInitialized.current) {
+    // Only run initialization once per modal open
+    // ... initialization logic ...
+    hasInitialized.current = true
+  }
+  
+  // Reset flag when modal closes
+  if (!isOpen) {
+    hasInitialized.current = false
+  }
+}, [dependencies])
+```
 
-### Input Validation
-- **Client-side Validation**: Immediate user feedback
-- **Type Safety**: TypeScript interface validation
-- **URL Parameter Sanitization**: Safe handling of URL state
-- **XSS Prevention**: Safe HTML rendering practices
+## Performance Patterns
 
-### Content Security
-- **Next.js Protection**: Built-in security features
-- **CSS Variable Safety**: Secure theme implementation
-- **Context Isolation**: Proper context boundaries
-- **Error Information**: Secure error handling without data leaks
+### Memoization Pattern
+```typescript
+// Memoized search results
+const filteredResults = useMemo(() => {
+  let results = searchResources(query)
+  
+  // Apply advanced search filters
+  if (advancedFilters.format !== 'all') {
+    results = results.filter(result => result.type === advancedFilters.format)
+  }
+  
+  return results
+}, [query, advancedFilters])
+```
+
+### Controlled Re-rendering Pattern
+```typescript
+// Only show results when search is actually triggered
+const shouldShowResults = hasSearched && (query || isAdvancedSearchActive)
+
+// Conditional rendering
+{shouldShowResults && (
+  <SearchResults />
+)}
+```
 
 ## Accessibility Patterns
 
-### Universal Design
-- **Semantic HTML**: Proper heading structure and landmarks
-- **ARIA Implementation**: Screen reader support for complex interactions
-- **Keyboard Navigation**: Tab order and keyboard shortcuts
-- **Focus Management**: Proper focus handling in dynamic content
+### Keyboard Navigation Pattern
+```typescript
+const handleKeyDown = (e: React.KeyboardEvent) => {
+  switch (e.key) {
+    case 'ArrowDown':
+      e.preventDefault()
+      setSelectedIndex(prev => 
+        prev < filteredResults.length - 1 ? prev + 1 : prev
+      )
+      break
+    
+    case 'ArrowUp':
+      e.preventDefault()
+      setSelectedIndex(prev => prev > -1 ? prev - 1 : -1)
+      break
+    
+    case 'Enter':
+      e.preventDefault()
+      if (selectedIndex >= 0) {
+        handleSuggestionClick(filteredResults[selectedIndex])
+      } else {
+        handleSearch(query)
+      }
+      break
+    
+    case 'Escape':
+      e.preventDefault()
+      setSelectedIndex(-1)
+      setIsFocused(false)
+      break
+  }
+}
+```
 
-### Theme Accessibility
-- **Color Contrast**: WCAG AA compliance in both themes
-- **Motion Preferences**: Respects reduced motion settings
-- **Screen Reader**: Theme changes announced appropriately
-- **Keyboard Access**: Full theme functionality via keyboard
+### ARIA Labels Pattern
+```typescript
+<button
+  onClick={() => setIsAdvancedSearchOpen(true)}
+  className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+  aria-label="Open advanced search options"
+>
+  <Settings className="w-4 h-4" />
+  Advanced Search
+</button>
+```
+
+## Code Organization Patterns
+
+### Barrel Export Pattern
+```typescript
+// atoms/searchAtoms.ts
+export { 
+  searchQueryAtom, 
+  advancedSearchCriteriaAtom, 
+  advancedSearchFiltersAtom,
+  isAdvancedSearchActiveAtom,
+  type SearchCriteria,
+  type AdvancedSearchFilters
+}
+
+// Usage in components
+import { 
+  searchQueryAtom, 
+  advancedSearchCriteriaAtom,
+  type SearchCriteria 
+} from '@/atoms/searchAtoms'
+```
+
+### Service Layer Pattern
+```typescript
+// services/index.ts
+export { 
+  searchResources, 
+  sortSearchResults, 
+  type SortOption, 
+  type SortDirection 
+} from './searchResults'
+
+// Usage in components
+import { searchResources, sortSearchResults, type SortOption } from '@/services'
+```
 
 ## Testing Patterns
 
-### Component Testing Strategy
-- **Unit Tests**: Individual component functionality
-- **Integration Tests**: Component interaction testing
-- **Accessibility Tests**: Automated accessibility validation
-- **Visual Tests**: Theme and responsive design validation
+### Component Testing Pattern
+```typescript
+// Test structure for components with Jotai
+import { Provider } from 'jotai'
 
-### Search Flow Testing
-- **E2E Tests**: Complete user journey testing
-- **API Mocking**: Predictable test data
-- **State Testing**: URL state persistence validation
-- **Performance Tests**: Search response time validation
+const TestWrapper = ({ children }) => (
+  <Provider>
+    {children}
+  </Provider>
+)
 
-This comprehensive pattern system ensures maintainable, scalable, and professional code organization while providing excellent user experience and developer productivity.
+// Test component with atoms
+render(
+  <TestWrapper>
+    <SearchComponent />
+  </TestWrapper>
+)
+```
+
+## Deployment Patterns
+
+### Environment Configuration Pattern
+```typescript
+// next.config.ts
+const nextConfig = {
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  images: {
+    domains: ['localhost'],
+  },
+}
+```
+
+These patterns ensure consistent, maintainable, and scalable code across the Discovery UI application while providing excellent user experience and developer productivity.
