@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { useAtom } from 'jotai'
-import { LogIn, UserPlus } from 'lucide-react'
 import { isAuthenticatedAtom } from '@/atoms/authAtoms'
 
 const AuthButtons: React.FC = () => {
@@ -12,23 +11,13 @@ const AuthButtons: React.FC = () => {
   if (isAuthenticated) return null
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-5">
       {/* Sign In Button */}
       <Link
         href="/auth/sign-in"
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+        className="btn btn-neutral rounded-full"
       >
-        <LogIn className="w-4 h-4" />
-        <span className="hidden sm:inline">Sign in</span>
-      </Link>
-
-      {/* Sign Up Button */}
-      <Link
-        href="/auth/sign-up"
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
-      >
-        <UserPlus className="w-4 h-4" />
-        <span className="hidden sm:inline">Sign up</span>
+        <span>Log in</span>
       </Link>
     </div>
   )

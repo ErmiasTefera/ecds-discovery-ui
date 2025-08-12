@@ -1,4 +1,6 @@
 import { atom } from 'jotai'
+import { sortSearchResults, type SortOption, type SortDirection } from '@/services'
+import type { SearchResult } from '@/models'
 
 export interface SearchCriteria {
   field: string
@@ -31,7 +33,7 @@ export const advancedSearchFiltersAtom = atom<AdvancedSearchFilters>({
 export const searchLoadingAtom = atom<boolean>(false)
 
 // Search results atom (if needed for caching)
-export const searchResultsAtom = atom<any[]>([])
+export const searchResultsAtom = atom<SearchResult[]>([])
 
 // Combined search state atom for easy access
 export const searchStateAtom = atom(
@@ -119,3 +121,40 @@ export const resetSearchStateAtom = atom(
     set(searchResultsAtom, [])
   }
 )
+
+// Sorting state
+export const sortByAtom = atom<SortOption>('relevance')
+export const sortDirectionAtom = atom<SortDirection>('desc')
+
+// View mode state
+export const viewModeAtom = atom<'list' | 'grid'>('list')
+
+// Pagination state
+export const currentPageAtom = atom<number>(1)
+export const resultsPerPageAtom = atom<number>(2)
+
+// Derived: sorted results
+export const sortedResultsAtom = atom((get) => {
+  const results = get(searchResultsAtom)
+  const sortBy = get(sortByAtom)
+  const sortDirection = get(sortDirectionAtom)
+  const query = get(searchQueryAtom)
+  return sortSearchResults(results, sortBy, sortDirection, query)
+})
+
+// Derived: total pages
+export const totalPagesAtom = atom((get) => {
+  const sorted = get(sortedResultsAtom)
+  const perPage = get(resultsPerPageAtom)
+  return Math.max(1, Math.ceil(sorted.length / perPage))
+})
+
+// Derived: paginated results
+export const paginatedResultsAtom = atom((get) => {
+  const sorted = get(sortedResultsAtom)
+  const page = get(currentPageAtom)
+  const perPage = get(resultsPerPageAtom)
+  const start = (page - 1) * perPage
+  const end = start + perPage
+  return sorted.slice(start, end)
+})
