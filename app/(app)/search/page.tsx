@@ -10,7 +10,6 @@ import {
   searchQueryAtom,
   advancedSearchCriteriaAtom, 
   advancedSearchFiltersAtom,
-  isAdvancedSearchActiveAtom,
   searchLoadingAtom,
   searchResultsAtom,
 } from '@/atoms/searchAtoms'
@@ -19,6 +18,9 @@ import SortControls from '@/components/SortControls'
 import ViewModeToggle from '@/components/ViewModeToggle'
 import SearchResults from '@/components/SearchResults'
 import Pagination from '@/components/Pagination'
+import ActiveFilters from '@/components/ActiveFilters'
+// import FilterDialog from '@/components/FilterDialog'
+import { resetDraftFiltersAtom, selectedFiltersAtom, draftSelectedFiltersAtom } from '@/atoms/filterAtoms'
 
 
 
@@ -26,22 +28,29 @@ export default function SearchPage() {
   const searchParams = useSearchParams()
   const [, setIsLoading] = useAtom(searchLoadingAtom)
   const [hasSearched, setHasSearched] = useState(false)
+  const [committedQuery, setCommittedQuery] = useState('')
+  const [hasUrlAdvanced, setHasUrlAdvanced] = useState(false)
   
   const [query, setQuery] = useAtom(searchQueryAtom)
   const [, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
   const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
-  const [isAdvancedSearchActive] = useAtom(isAdvancedSearchActiveAtom)
 
   // Parse advanced search parameters from URL and sync with atoms
+  const [, setSelectedFiltersFromUrl] = useAtom(selectedFiltersAtom)
+  const [, setDraftSelectedFiltersFromUrl] = useAtom(draftSelectedFiltersAtom)
   useEffect(() => {
     const urlQuery = searchParams?.get('q') || ''
     setQuery(urlQuery)
+    setCommittedQuery(urlQuery)
     
     const criteriaParam = searchParams?.get('criteria')
     const filtersParam = searchParams?.get('filters')
+    const facetsParam = searchParams?.get('facets')
+    const advancedPresent = Boolean(criteriaParam || filtersParam || facetsParam)
+    setHasUrlAdvanced(advancedPresent)
     
     // Set hasSearched to true if there's a query parameter or advanced search parameters
-    if (urlQuery || criteriaParam || filtersParam) {
+    if (urlQuery || advancedPresent) {
       setHasSearched(true)
     }
     
@@ -60,23 +69,39 @@ export default function SearchPage() {
         console.error('Failed to parse filters from URL:', e)
       }
     }
-  }, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters])
+    // facets param -> hydrate selected filters atoms
+    if (facetsParam) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(facetsParam)) as Record<string, string[]>
+        setSelectedFiltersFromUrl(parsed)
+        setDraftSelectedFiltersFromUrl(parsed)
+      } catch (e) {
+        console.error('Failed to parse facets from URL:', e)
+        setSelectedFiltersFromUrl({})
+        setDraftSelectedFiltersFromUrl({})
+      }
+    } else {
+      setSelectedFiltersFromUrl({})
+      setDraftSelectedFiltersFromUrl({})
+    }
+  }, [searchParams, setQuery, setAdvancedCriteria, setAdvancedFilters, setSelectedFiltersFromUrl, setDraftSelectedFiltersFromUrl])
 
   // State for search results
   const [, setSearchResults] = useAtom(searchResultsAtom)
   const [resultsLoading, setResultsLoading] = useState(false)
+  const [, resetDraftFilters] = useAtom(resetDraftFiltersAtom)
 
   // Fetch search results
   useEffect(() => {
     const fetchResults = async () => {
-      if (!hasSearched || (!query && !isAdvancedSearchActive)) {
+      if (!hasSearched || (!committedQuery && !hasUrlAdvanced)) {
         setSearchResults([])
         return
       }
 
       setResultsLoading(true)
       try {
-        let results = await searchResources(query)
+        let results = await searchResources(committedQuery)
         
         // Apply advanced search filters if present
         if (advancedFilters.format !== 'all') {
@@ -104,12 +129,19 @@ export default function SearchPage() {
     }
 
     fetchResults()
-  }, [query, advancedFilters, hasSearched, isAdvancedSearchActive, setSearchResults])
+  }, [committedQuery, advancedFilters, hasSearched, hasUrlAdvanced, setSearchResults])
 
   // Update loading state based on results loading
   useEffect(() => {
     setIsLoading(resultsLoading)
   }, [resultsLoading, setIsLoading])
+
+  // On unmount/navigate away, discard any un-applied draft filters
+  useEffect(() => {
+    return () => {
+      resetDraftFilters()
+    }
+  }, [resetDraftFilters])
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,26 +151,25 @@ export default function SearchPage() {
           <SearchComponent initialQuery={query} />
         </div>
 
-        {hasSearched && (query || isAdvancedSearchActive) && (
+        {hasSearched && (committedQuery || hasUrlAdvanced) && (
           <>
             {/* Search Info */}
             <SearchInfo />
 
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Filters Sidebar */}
-              <div className="lg:w-64 flex-shrink-0">
+              {/* Filters Sidebar (hidden on lg and below) */}
+              <div className="lg:w-64 flex-shrink-0 hidden lg:block">
                 <Filter />
               </div>
 
               {/* Main Content */}
               <div className="flex-1">
-                {/* Controls Bar */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 p-4 bg-secondary/20 rounded-lg">
-                  <div className="flex items-center gap-4">
+              <ActiveFilters />
+
+                <div className="flex w-full justify-end items-center gap-4 mb-6 mt-3">
                     <SortControls />
+                    <ViewModeToggle />
                   </div>
-                  <ViewModeToggle />
-                </div>
 
                 <SearchResults />
 

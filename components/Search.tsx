@@ -9,6 +9,7 @@ import SearchSuggestions from '@/components/SearchSuggestions'
 import NoResultsMessage from '@/components/NoResultsMessage'
 import AdvancedSearchTrigger from '@/components/AdvancedSearchTrigger'
 import QuickSearchTips from '@/components/QuickSearchTips'
+import { Input } from '@/components/ui/input'
 import { useAtom } from 'jotai'
 import { 
   searchQueryAtom, 
@@ -38,6 +39,7 @@ const Search: React.FC<SearchProps> = ({
   const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
   
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [inputValue, setInputValue] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
   
@@ -49,9 +51,9 @@ const Search: React.FC<SearchProps> = ({
   useEffect(() => {
     const urlQuery = searchParams?.get('q') || ''
     if (initialQuery !== undefined) {
-      setQuery(initialQuery)
+      setInputValue(initialQuery)
     } else if (urlQuery) {
-      setQuery(urlQuery)
+      setInputValue(urlQuery)
     }
 
     // Parse advanced search parameters from URL
@@ -73,7 +75,7 @@ const Search: React.FC<SearchProps> = ({
         console.error('Failed to parse filters from URL:', e)
       }
     }
-  }, [searchParams, initialQuery, setQuery, setAdvancedCriteria, setAdvancedFilters])
+  }, [searchParams, initialQuery, setAdvancedCriteria, setAdvancedFilters])
 
     // Filter search suggestions based on query
   const [filteredResults, setFilteredResults] = useState<MockResult[]>([])
@@ -81,13 +83,13 @@ const Search: React.FC<SearchProps> = ({
   // Fetch search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!query.trim()) {
+      if (!inputValue.trim()) {
         setFilteredResults([])
         return
       }
 
       try {
-        const suggestions = await getSearchSuggestions(query, 5)
+        const suggestions = await getSearchSuggestions(inputValue, 5)
         setFilteredResults(suggestions)
       } catch (error) {
         console.error('Error fetching suggestions:', error)
@@ -98,7 +100,7 @@ const Search: React.FC<SearchProps> = ({
     // Debounce the search suggestions
     const timeoutId = setTimeout(fetchSuggestions, 300)
     return () => clearTimeout(timeoutId)
-  }, [query])
+  }, [inputValue])
 
   // Reset selected index when results change
   React.useEffect(() => {
@@ -108,7 +110,7 @@ const Search: React.FC<SearchProps> = ({
   
 
   const handleSuggestionClick = (suggestion: MockResult) => {
-    setQuery(suggestion.title)
+    setInputValue(suggestion.title)
     setSelectedIndex(-1)
     handleSearch(suggestion.title)
   }
@@ -142,8 +144,8 @@ const Search: React.FC<SearchProps> = ({
     const searchParams = new URLSearchParams()
     
     // Add basic query if available
-    if (query.trim()) {
-      searchParams.set('q', query.trim())
+    if (inputValue.trim()) {
+      searchParams.set('q', inputValue.trim())
     }
     
     // Add advanced search parameters
@@ -157,18 +159,18 @@ const Search: React.FC<SearchProps> = ({
     
     router.push(`/search?${searchParams.toString()}`)
     setIsLoading(false)
-  }, [router, query, setIsLoading])
+  }, [router, inputValue, setIsLoading])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    handleSearch(query)
+    handleSearch(inputValue)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (filteredResults.length === 0) {
       if (e.key === 'Enter') {
         e.preventDefault()
-        handleSearch(query)
+        handleSearch(inputValue)
       }
       return
     }
@@ -194,7 +196,7 @@ const Search: React.FC<SearchProps> = ({
           handleSuggestionClick(selectedResult)
         } else {
           // No suggestion selected, search with current query
-          handleSearch(query)
+          handleSearch(inputValue)
         }
         break
       
@@ -227,18 +229,17 @@ const Search: React.FC<SearchProps> = ({
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center border-1 border-primary rounded-lg">
 
-          {/* Search Input */}
-          <input
+          {/* Search Input (shadcn) */}
+          <Input
             ref={inputRef}
             type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder={placeholder}
-            className="input input-lg w-full pl-4 pr-12 rounded-xl input-bordered input-warning 
-                     shadow-lg focus:shadow-xl focus:outline-none focus:ring-0 transition-all"
+            className="h-12 w-full pl-4 pr-12 rounded-xl shadow-lg focus:shadow-xl"
             disabled={isLoading}
             aria-label="Search scholarly resources"
           />
@@ -246,8 +247,8 @@ const Search: React.FC<SearchProps> = ({
           {/* Search Button */}
           <button
             type="submit"
-            disabled={!query.trim() || isLoading}
-            className="btn btn-ghost btn-square btn-sm absolute right-2 disabled:cursor-not-allowed text-primary"
+            disabled={!inputValue.trim() || isLoading}
+            className="absolute right-2 inline-flex items-center justify-center rounded-md p-2 text-primary hover:bg-secondary disabled:cursor-not-allowed"
             aria-label="Submit search"
           >
             {isLoading ? (
@@ -259,7 +260,7 @@ const Search: React.FC<SearchProps> = ({
         </div>
 
         {/* Search Suggestions with Mock Results */}
-        {query && isFocused && filteredResults.length > 0 && (
+        {inputValue && isFocused && filteredResults.length > 0 && (
           <SearchSuggestions
             results={filteredResults}
             selectedIndex={selectedIndex}
@@ -269,7 +270,7 @@ const Search: React.FC<SearchProps> = ({
         )}
 
         {/* No Results Message */}
-        {query && isFocused && filteredResults.length === 0 && (
+        {inputValue && isFocused && filteredResults.length === 0 && (
           <NoResultsMessage />
         )}
       </form>
@@ -278,7 +279,7 @@ const Search: React.FC<SearchProps> = ({
       <AdvancedSearchTrigger onOpen={() => setIsAdvancedSearchOpen(true)} />
 
       {/* Quick Search Tips */}
-      <QuickSearchTips onSelect={(term) => setQuery(term)} />
+      <QuickSearchTips onSelect={(term) => setInputValue(term)} />
 
       {/* Advanced Search Modal */}
       <AdvancedSearchModal
@@ -286,7 +287,7 @@ const Search: React.FC<SearchProps> = ({
         onClose={() => setIsAdvancedSearchOpen(false)}
         onSearch={handleAdvancedSearch}
         initialFilters={advancedFilters}
-        mainSearchQuery={query}
+        mainSearchQuery={inputValue}
       />
     </div>
   )

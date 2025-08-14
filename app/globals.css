@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@plugin "daisyui";
+/* @plugin "daisyui"; */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -161,7 +161,6 @@
     @apply bg-background text-foreground;
   }
 }
-
   .input {
     background-color: transparent;
   }

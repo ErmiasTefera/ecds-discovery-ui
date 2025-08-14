@@ -32,7 +32,6 @@ const SortControls: React.FC = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-foreground">Sort by:</span>
       <Select value={sortBy} onValueChange={(value) => handleSortChange(value as SortOption)}>
         <SelectTrigger className="w-32">
           <SelectValue placeholder="Select sort option" />
@@ -44,13 +43,6 @@ const SortControls: React.FC = () => {
           <SelectItem value="downloads">Downloads</SelectItem>
         </SelectContent>
       </Select>
-      <button
-        onClick={() => setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-        className="p-2 hover:bg-secondary rounded-md transition-colors"
-        title={`Sort ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
-      >
-        {sortDirection === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
-      </button>
     </div>
   )
 }

@@ -1,23 +1,37 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react'
+import React, { useEffect } from 'react'
+import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { getFilters } from '@/services'
-import type { FilterOption, FilterGroup } from '@/models'
+import type { FilterOption } from '@/models'
+import { useAtom } from 'jotai'
+import {
+  filtersAtom,
+  filtersLoadingAtom,
+  filtersErrorAtom,
+  draftSelectedFiltersAtom,
+  expandedGroupsAtom,
+  showMoreAtom,
+  changeFilterSelectionAtom,
+  toggleGroupAtom,
+  toggleShowMoreAtom,
+  resetDraftFiltersAtom,
+  editModeAtom,
+} from '@/atoms/filterAtoms'
+// ActiveFilters is used elsewhere; Filter focuses on groups and selection
 
 const Filter: React.FC = () => {
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({})
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    type: true,
-    year: true,
-    subject: false,
-    access: false,
-    language: false
-  })
-  const [showMore, setShowMore] = useState<Record<string, boolean>>({})
-  const [filters, setFilters] = useState<FilterGroup[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [filters, setFilters] = useAtom(filtersAtom)
+  const [loading, setLoading] = useAtom(filtersLoadingAtom)
+  const [error, setError] = useAtom(filtersErrorAtom)
+  const [selectedFilters] = useAtom(draftSelectedFiltersAtom)
+  const [expandedGroups] = useAtom(expandedGroupsAtom)
+  const [showMore] = useAtom(showMoreAtom)
+  const [, changeSelection] = useAtom(changeFilterSelectionAtom)
+  const [, toggleGroup] = useAtom(toggleGroupAtom)
+  const [, toggleShowMore] = useAtom(toggleShowMoreAtom)
+  const [, resetDraft] = useAtom(resetDraftFiltersAtom)
+  const [, setEditMode] = useAtom(editModeAtom)
 
   // Fetch filters
   useEffect(() => {
@@ -37,55 +51,28 @@ const Filter: React.FC = () => {
     }
 
     fetchFilters()
-  }, [])
+  }, [setFilters, setLoading, setError])
+
+  // When the Filter component mounts in any context (sidebar or dialog), sync draft with committed state
+  useEffect(() => {
+    setEditMode(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches ? 'sidebar' : 'dialog')
+    resetDraft()
+  }, [resetDraft, setEditMode])
 
   const handleFilterChange = (groupId: string, optionId: string, checked: boolean) => {
-    setSelectedFilters(prev => {
-      const groupFilters = prev[groupId] || []
-      if (checked) {
-        return {
-          ...prev,
-          [groupId]: [...groupFilters, optionId]
-        }
-      } else {
-        return {
-          ...prev,
-          [groupId]: groupFilters.filter(id => id !== optionId)
-        }
-      }
-    })
+    changeSelection({ groupId, optionId, checked })
   }
 
-  const removeFilter = (groupId: string, optionId: string) => {
-    handleFilterChange(groupId, optionId, false)
-  }
-
-  const clearAllFilters = () => {
-    setSelectedFilters({})
-  }
-
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupId]: !prev[groupId]
-    }))
-  }
-
-  const toggleShowMore = (groupId: string) => {
-    setShowMore(prev => ({
-      ...prev,
-      [groupId]: !prev[groupId]
-    }))
-  }
+  // const removeFilter = (groupId: string, optionId: string) => {
+  //   changeSelection({ groupId, optionId, checked: false })
+  // }
 
   const getVisibleOptions = (options: FilterOption[], groupId: string) => {
     const showMoreForGroup = showMore[groupId]
     return showMoreForGroup ? options : options.slice(0, 5)
   }
 
-  const getTotalSelectedCount = () => {
-    return Object.values(selectedFilters).reduce((total, filters) => total + filters.length, 0)
-  }
+  // const getTotalSelectedCount = () => Object.values(selectedFilters).reduce((total, filters) => total + filters.length, 0)
 
   if (loading) {
     return (
@@ -112,46 +99,7 @@ const Filter: React.FC = () => {
     <div className="bg-background border border-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground">Filters</h2>
-        {getTotalSelectedCount() > 0 && (
-          <button
-            onClick={clearAllFilters}
-            className="text-sm text-primary hover:text-primary/80 transition-colors"
-          >
-            Clear all
-          </button>
-        )}
       </div>
-
-      {/* Active Filters */}
-      {getTotalSelectedCount() > 0 && (
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-foreground mb-2">Active Filters</h3>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(selectedFilters).map(([groupId, filterIds]) =>
-              filterIds.map(filterId => {
-                const group = filters.find(g => g.id === groupId)
-                const option = group?.options.find(o => o.id === filterId)
-                if (!option) return null
-
-                return (
-                  <span
-                    key={`${groupId}-${filterId}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-md"
-                  >
-                    {option.label}
-                    <button
-                      onClick={() => removeFilter(groupId, filterId)}
-                      className="hover:bg-primary/20 rounded-sm p-0.5"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                )
-              })
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Filter Groups */}
       <div className="space-y-4">
@@ -181,7 +129,7 @@ const Filter: React.FC = () => {
                         type="checkbox"
                         checked={selectedFilters[group.id]?.includes(option.id) || false}
                         onChange={(e) => handleFilterChange(group.id, option.id, e.target.checked)}
-                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary focus:ring-1"
+                        className="checkbox checkbox-primary"
                       />
                       <span className="text-sm text-foreground">{option.label}</span>
                     </div>

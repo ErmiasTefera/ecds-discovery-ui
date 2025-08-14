@@ -10,6 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAtom } from 'jotai'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { 
   advancedSearchCriteriaAtom, 
   advancedSearchFiltersAtom,
@@ -169,13 +172,9 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-bold text-foreground">Advanced Search</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-secondary rounded-md transition-colors"
-            aria-label="Close modal"
-          >
+          <Button onClick={onClose} variant="ghost" size="icon" aria-label="Close modal">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="p-6">
@@ -201,12 +200,12 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                       </SelectContent>
                     </Select>
 
-                    <input
+                    <Input
                       type="text"
                       value={criteria.value}
                       onChange={(e) => updateCriteria(index, 'value', e.target.value)}
                       placeholder="Enter your search term"
-                      className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="flex-1"
                     />
 
                     {index < searchCriteria.length - 1 && (
@@ -228,23 +227,15 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                     )}
 
                     {index === searchCriteria.length - 1 && (
-                      <button
-                        onClick={addCriteria}
-                        className="p-2 text-primary hover:bg-secondary rounded-md transition-colors"
-                        aria-label="Add search criteria"
-                      >
+                      <Button onClick={addCriteria} variant="ghost" size="icon" aria-label="Add search criteria">
                         <Plus className="w-4 h-4" />
-                      </button>
+                      </Button>
                     )}
 
                     {searchCriteria.length > 3 && (
-                      <button
-                        onClick={() => removeCriteria(index)}
-                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-secondary rounded-md transition-colors"
-                        aria-label="Remove search criteria"
-                      >
+                      <Button onClick={() => removeCriteria(index)} variant="ghost" size="icon" aria-label="Remove search criteria">
                         <X className="w-4 h-4" />
-                      </button>
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -255,33 +246,33 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
             <div className="space-y-4">
                 {/* Year Range */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2 text-left">Year</label>
+                  <Label className="mb-2 text-left">Year</Label>
                   <div className="flex items-center gap-2">
-                    <input
+                    <Input
                       type="number"
                       value={filters.yearFrom}
                       onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
                       placeholder="YYYY"
-                      min="1900"
-                      max="2030"
-                      className="w-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      min={1900}
+                      max={2030}
+                      className="w-24"
                     />
                     <span className="text-sm text-muted-foreground">to</span>
-                    <input
+                    <Input
                       type="number"
                       value={filters.yearTo}
                       onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
                       placeholder="YYYY"
-                      min="1900"
-                      max="2030"
-                      className="w-20 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      min={1900}
+                      max={2030}
+                      className="w-24"
                     />
                   </div>
                 </div>
 
                 {/* Format */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2 text-left">Format</label>
+                  <Label className="mb-2 text-left">Format</Label>
                   <Select
                     value={filters.format}
                     onValueChange={(value) => setFilters({ ...filters, format: value })}
@@ -301,7 +292,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
 
                 {/* Language */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2 text-left">Language</label>
+                  <Label className="mb-2 text-left">Language</Label>
                   <Select
                     value={filters.language}
                     onValueChange={(value) => setFilters({ ...filters, language: value })}
@@ -324,25 +315,10 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between p-6 border-t border-border">
-          <button
-            onClick={handleReset}
-            className="text-primary hover:text-primary/80 transition-colors"
-          >
-            Reset
-          </button>
+          <Button onClick={handleReset} variant="ghost">Reset</Button>
           <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-border rounded-md hover:bg-secondary transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Search
-            </button>
+            <Button onClick={onClose} variant="outline">Cancel</Button>
+            <Button onClick={handleSearch}>Search</Button>
           </div>
         </div>
       </div>

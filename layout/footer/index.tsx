@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import { Search, Mail, Github, ExternalLink } from 'lucide-react'
+import { Mail, ExternalLink } from 'lucide-react'
+import { HomeButton } from '@/components/HomeButton'
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
@@ -11,16 +12,8 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
-                <Search className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Discovery UI</h3>
-                <p className="text-sm text-muted-foreground">Scholarly Resources Discovery Platform</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground max-w-md">
+            <HomeButton />
+            <p className="text-sm text-muted-foreground max-w-md mt-3">
               Unified access to scholarly resources from library catalogs, institutional repositories, 
               subscription databases, and open-access archives in one intelligent search interface.
             </p>
@@ -64,45 +57,6 @@ const Footer: React.FC = () => {
               </li>
             </ul>
           </div>
-
-          {/* Resources */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link 
-                  href="#" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  User Guide
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="#" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  API Documentation
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="#" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="#" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Divider */}
@@ -111,36 +65,6 @@ const Footer: React.FC = () => {
             {/* Copyright */}
             <div className="text-sm text-muted-foreground">
               © {currentYear} Discovery UI. All rights reserved.
-            </div>
-
-            {/* Contact & Links */}
-            <div className="flex items-center space-x-6">
-              <Link 
-                href="mailto:support@discoveryui.com" 
-                className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Contact us by email"
-              >
-                <Mail className="w-4 h-4" />
-                <span>Contact</span>
-              </Link>
-              
-              <Link 
-                href="#" 
-                className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                aria-label="View source code on GitHub"
-              >
-                <Github className="w-4 h-4" />
-                <span>GitHub</span>
-              </Link>
-
-              <Link 
-                href="#" 
-                className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                aria-label="Visit project website"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>Docs</span>
-              </Link>
             </div>
 
             {/* Version */}

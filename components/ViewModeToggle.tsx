@@ -8,7 +8,6 @@ const ViewModeToggle: React.FC = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-foreground">View:</span>
       <div className="flex border border-border rounded-md">
         <button
           onClick={() => setViewMode('list')}
