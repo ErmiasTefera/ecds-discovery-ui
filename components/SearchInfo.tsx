@@ -10,6 +10,10 @@ import {
   resultsPerPageAtom,
   searchLoadingAtom,
 } from '@/atoms/searchAtoms'
+import SortControls from '@/components/SortControls'
+import ActiveFilters from './ActiveFilters'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { Filter as FilterIcon } from 'lucide-react'
 
 const SearchInfo: React.FC = () => {
   const [query] = useAtom(searchQueryAtom)
@@ -33,34 +37,78 @@ const SearchInfo: React.FC = () => {
     ? `Showing ${totalResults} of ${totalResults} Results`
     : `Showing ${startIndex}-${endIndex} of ${totalResults} Results`
 
+  // Build applied chips for a more visual summary
+  const criteriaChips = advancedCriteria
+    .filter(c => c.value.trim().length > 0)
+    .map((c, idx) => (
+      <span
+        key={`crit-${idx}-${c.field}`}
+        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
+      >
+        <span className="font-medium capitalize">{c.field}:</span> {c.value}
+      </span>
+    ))
+
+  const filterChips: React.ReactNode[] = []
+  if (advancedFilters.format !== 'all') {
+    filterChips.push(
+      <span key="format" className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-secondary text-secondary-foreground">
+        <span className="font-medium">Format:</span> {advancedFilters.format}
+      </span>
+    )
+  }
+  if (advancedFilters.yearFrom || advancedFilters.yearTo) {
+    filterChips.push(
+      <span key="year" className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-secondary text-secondary-foreground">
+        <span className="font-medium">Year:</span> {advancedFilters.yearFrom || '1900'} - {advancedFilters.yearTo || '2030'}
+      </span>
+    )
+  }
+
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-foreground mb-2">
-        Search Results for &quot;{query}&quot;
-      </h1>
-      {isAdvancedSearchActive && (
-        <div className="mb-2 p-3 bg-secondary/20 rounded-lg">
-          <p className="text-sm font-medium text-foreground mb-1">Advanced Search Applied:</p>
-          <div className="text-xs text-muted-foreground space-y-1">
-            {advancedCriteria.length > 0 && (
-              <div>
-                <span className="font-medium">Criteria:</span> {advancedCriteria.map(c => `${c.field}: "${c.value}"`).join(' AND ')}
-              </div>
-            )}
-            {advancedFilters.format !== 'all' && (
-              <div>
-                <span className="font-medium">Format:</span> {advancedFilters.format}
-              </div>
-            )}
-            {(advancedFilters.yearFrom || advancedFilters.yearTo) && (
-              <div>
-                <span className="font-medium">Year:</span> {advancedFilters.yearFrom || '1900'} - {advancedFilters.yearTo || '2030'}
-              </div>
-            )}
+      <div className="">
+        {query && (
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
+            Search Results for 
+            <span className="text-primary"> “{query}”</span>
+          </h1>
+        )}
+
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">{infoText}</p>
+          <div className="flex items-center gap-3">
+            <SortControls />
           </div>
         </div>
-      )}
-      <p className="text-muted-foreground">{infoText}</p>
+
+        <Collapsible defaultOpen>
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Filters</p>
+            <CollapsibleTrigger
+              aria-label="Toggle filters"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
+            >
+              <FilterIcon className="w-4 h-4" />
+              <span className="sr-only">Toggle filters</span>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent>
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+              {isAdvancedSearchActive && (criteriaChips.length > 0 || filterChips.length > 0) && (
+                <div className="p-3 rounded-lg border border-border bg-secondary/10">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Advanced Filters</p>
+                  <div className="flex flex-wrap gap-2">
+                    {criteriaChips}
+                    {filterChips}
+                  </div>
+                </div>
+              )}
+              <ActiveFilters />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </div>
   )
 }

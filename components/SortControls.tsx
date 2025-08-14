@@ -33,14 +33,16 @@ const SortControls: React.FC = () => {
   return (
     <div className="flex items-center gap-2">
       <Select value={sortBy} onValueChange={(value) => handleSortChange(value as SortOption)}>
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="w-40">
           <SelectValue placeholder="Select sort option" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="relevance">Relevance</SelectItem>
-          <SelectItem value="date">Date</SelectItem>
-          <SelectItem value="citations">Citations</SelectItem>
-          <SelectItem value="downloads">Downloads</SelectItem>
+          <SelectItem value="popularity">Popularity</SelectItem>
+          <SelectItem value="recent">Recent ↑</SelectItem>
+          <SelectItem value="oldest">Oldest ↓</SelectItem>
+          <SelectItem value="title-asc">Title (A–Z)</SelectItem>
+          <SelectItem value="title-desc">Title (Z–A)</SelectItem>
         </SelectContent>
       </Select>
     </div>

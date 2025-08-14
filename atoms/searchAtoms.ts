@@ -131,7 +131,7 @@ export const viewModeAtom = atom<'list' | 'grid'>('list')
 
 // Pagination state
 export const currentPageAtom = atom<number>(1)
-export const resultsPerPageAtom = atom<number>(2)
+export const resultsPerPageAtom = atom<number>(10)
 
 // Derived: sorted results
 export const sortedResultsAtom = atom((get) => {

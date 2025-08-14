@@ -54,7 +54,7 @@ const ActiveFilters: React.FC = () => {
   if (totalSelected === 0) return null
 
   return (
-    <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+    <div className="">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Button

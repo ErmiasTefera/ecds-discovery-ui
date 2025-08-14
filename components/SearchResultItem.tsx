@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Sparkles, Loader2, Bookmark } from 'lucide-react'
+import CitationDialog from '@/components/CitationDialog'
 import { useAtom } from 'jotai'
 import type { SearchResult } from '@/models'
 import { httpService } from '@/services/httpService'
@@ -38,6 +41,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
   const [showSaveModal, setShowSaveModal] = useState(false)
 
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
+  const searchParams = useSearchParams()
 
   const handleGetAISummary = async () => {
     if (hasRequestedSummary) return // Prevent multiple requests
@@ -91,21 +95,34 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
 
   const getDetailHref = (resourceId: string) => {
     const baseHref = `/detail/${resourceId}`
-    if (currentSearchQuery?.trim()) {
-      const searchParams = new URLSearchParams()
-      searchParams.set('q', currentSearchQuery.trim())
-      return `${baseHref}?${searchParams.toString()}`
+    const params = new URLSearchParams(searchParams?.toString() || '')
+    // Fallback to currentSearchQuery if URL has no q
+    if (currentSearchQuery?.trim() && !params.get('q')) {
+      params.set('q', currentSearchQuery.trim())
     }
-    return baseHref
+    const qs = params.toString()
+    return qs ? `${baseHref}?${qs}` : baseHref
   }
 
   return (
     <div className="bg-background border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
-      {/* Header */}
+      {/* Header with thumbnail */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3 flex-1">
-          <div className="flex-shrink-0 mt-1">
-            {getTypeIcon(result.type)}
+          <div className="flex-shrink-0">
+            {result.thumbnailUrl ? (
+              <Image
+                src={result.thumbnailUrl}
+                alt={result.title}
+                width={64}
+                height={64}
+                className="w-16 h-16 rounded object-cover border border-border"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded bg-secondary flex items-center justify-center border border-border">
+                {getTypeIcon(result.type)}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -246,6 +263,12 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
             <Bookmark className={`w-3 h-3 ml-1 ${isResourceSaved(result.id) ? 'fill-current' : ''}`} />
             {isResourceSaved(result.id) ? 'Saved' : 'Save'}
           </button>
+          <CitationDialog
+            triggerLabel="Cite"
+            apa={`${result.authors.join(', ')} (${result.year}). ${result.title}. ${result.journal || result.publisher || ''}.`}
+            mla={`${result.authors.join(', ')}. "${result.title}." ${result.journal || result.publisher || ''}, ${result.year}.`}
+            chicago={`${result.authors.join(', ')}. ${result.year}. ${result.title}. ${result.journal || result.publisher || ''}.`}
+          />
           <Link
             href={getDetailHref(result.id)}
             className="inline-flex items-center px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-md hover:bg-primary/90 transition-colors"

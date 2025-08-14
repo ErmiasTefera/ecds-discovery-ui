@@ -164,10 +164,9 @@ export default function SearchPage() {
 
               {/* Main Content */}
               <div className="flex-1">
-              <ActiveFilters />
+              {/* <ActiveFilters /> */}
 
                 <div className="flex w-full justify-end items-center gap-4 mb-6 mt-3">
-                    <SortControls />
                     <ViewModeToggle />
                   </div>
 

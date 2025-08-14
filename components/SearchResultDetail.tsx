@@ -22,6 +22,7 @@ import {
 import type { DetailResource } from '@/models'
 import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
+import CitationDialog from '@/components/CitationDialog'
 
 
 
@@ -181,13 +182,12 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
               Full Text
             </Link>
           )}
-          <button
-            onClick={() => handleCopy(formatCitation(), 'citation')}
-            className="inline-flex items-center px-4 py-2 border border-border text-foreground rounded-md hover:bg-secondary transition-colors"
-          >
-            <Quote className="w-4 h-4 mr-2" />
-            {copySuccess === 'citation' ? 'Copied!' : 'Cite'}
-          </button>
+          <CitationDialog
+            triggerLabel="Cite"
+            apa={formatCitation()}
+            mla={formatCitation()}
+            chicago={formatCitation()}
+          />
           <button
             onClick={() => handleCopy(window.location.href, 'link')}
             className="inline-flex items-center px-4 py-2 border border-border text-foreground rounded-md hover:bg-secondary transition-colors"

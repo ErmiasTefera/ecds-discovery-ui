@@ -343,7 +343,7 @@ export const mockSearchResults: SearchResult[] = [
   }
 ]
 
-export type SortOption = 'relevance' | 'date' | 'citations' | 'downloads'
+export type SortOption = 'relevance' | 'popularity' | 'recent' | 'oldest' | 'title-asc' | 'title-desc'
 export type SortDirection = 'asc' | 'desc'
 
 export const searchResources = async (query: string): Promise<SearchResult[]> => {
@@ -374,8 +374,8 @@ export const searchResources = async (query: string): Promise<SearchResult[]> =>
 }
 
 export const sortSearchResults = (
-  results: SearchResult[], 
-  sortBy: SortOption, 
+  results: SearchResult[],
+  sortBy: SortOption,
   direction: SortDirection,
   query?: string
 ): SearchResult[] => {
@@ -383,17 +383,28 @@ export const sortSearchResults = (
     let comparison = 0
 
     switch (sortBy) {
-      case 'date':
+      case 'recent':
+        comparison = a.year - b.year // will be reversed to desc below
+        direction = 'desc'
+        break;
+      case 'oldest':
         comparison = a.year - b.year
-        break
-      case 'citations':
-        comparison = a.citationCount - b.citationCount
-        break
-      case 'downloads':
-        comparison = a.downloadCount - b.downloadCount
-        break
+        direction = 'asc'
+        break;
+      case 'title-asc':
+      case 'title-desc':
+        comparison = a.title.localeCompare(b.title)
+        direction = sortBy === 'title-asc' ? 'asc' : 'desc'
+        break;
+      case 'popularity': {
+        const aScore = a.citationCount * 2 + a.downloadCount
+        const bScore = b.citationCount * 2 + b.downloadCount
+        comparison = aScore - bScore
+        direction = 'desc'
+        break;
+      }
       case 'relevance':
-      default:
+      default: {
         // Simple relevance scoring based on title match
         if (query) {
           const aScore = a.title.toLowerCase().includes(query.toLowerCase()) ? 1 : 0
@@ -402,7 +413,9 @@ export const sortSearchResults = (
         } else {
           comparison = 0
         }
-        break
+        direction = 'desc'
+        break;
+      }
     }
 
     return direction === 'asc' ? comparison : -comparison

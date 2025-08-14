@@ -16,6 +16,19 @@ export default function DetailPage() {
   const searchParams = useSearchParams()
   const resourceId = params?.resourceId as string
   const searchQuery = searchParams?.get('q') || ''
+  const facets = searchParams?.get('facets') || ''
+  const criteria = searchParams?.get('criteria') || ''
+  const filters = searchParams?.get('filters') || ''
+
+  const searchHref = (() => {
+    const params = new URLSearchParams()
+    if (searchQuery) params.set('q', searchQuery)
+    if (facets) params.set('facets', facets)
+    if (criteria) params.set('criteria', criteria)
+    if (filters) params.set('filters', filters)
+    const qs = params.toString()
+    return `/search${qs ? `?${qs}` : ''}`
+  })()
 
   // State for resource and loading
   const [resource, setResource] = useState<DetailResource | undefined>(undefined)
@@ -59,7 +72,7 @@ export default function DetailPage() {
             </Link>
             <span>/</span>
             <Link 
-              href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search'} 
+              href={searchHref} 
               className="hover:text-primary transition-colors"
             >
               {searchQuery ? 'Search Results' : 'Search'}
@@ -115,8 +128,8 @@ export default function DetailPage() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Go Back
               </button>
-              <Link
-                href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search'}
+              <Link 
+                href={searchHref} 
                 className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
               >
                 <Search className="w-4 h-4 mr-2" />
@@ -139,7 +152,7 @@ export default function DetailPage() {
           </Link>
           <span>/</span>
           <Link 
-            href={searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search'} 
+            href={searchHref} 
             className="hover:text-primary transition-colors"
           >
             {searchQuery ? 'Search Results' : 'Search'}
@@ -154,8 +167,8 @@ export default function DetailPage() {
         <div className="mb-6">
           <button
             onClick={() => {
-              if (searchQuery) {
-                router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+              if (searchQuery || facets || criteria || filters) {
+                router.push(searchHref)
               } else {
                 router.back()
               }

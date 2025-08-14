@@ -9,6 +9,7 @@ export interface SearchResult {
   description: string
   doi?: string
   url?: string
+  thumbnailUrl?: string
   tags: string[]
   downloadCount: number
   citationCount: number
