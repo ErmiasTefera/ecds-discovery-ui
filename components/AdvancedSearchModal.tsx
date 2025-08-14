@@ -13,6 +13,7 @@ import { useAtom } from 'jotai'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Slider } from '@/components/ui/slider'
 import { 
   advancedSearchCriteriaAtom, 
   advancedSearchFiltersAtom,
@@ -41,16 +42,18 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   },
   mainSearchQuery = ''
 }) => {
-  const [searchCriteria, setSearchCriteria] = useAtom(advancedSearchCriteriaAtom)
-  const [filters, setFilters] = useAtom(advancedSearchFiltersAtom)
+  // Global atoms (persisted when user clicks Search)
+  const [globalCriteria, setGlobalCriteria] = useAtom(advancedSearchCriteriaAtom)
+  const [globalFilters, setGlobalFilters] = useAtom(advancedSearchFiltersAtom)
+  // Local, non-persisted modal state
+  const [localCriteria, setLocalCriteria] = React.useState<SearchCriteria[]>([])
+  const [localFilters, setLocalFilters] = React.useState<AdvancedSearchFilters>(initialFilters)
   const hasInitialized = React.useRef(false)
 
   useEffect(() => {
     if (isOpen && !hasInitialized.current) {
-      // Always ensure we have at least the first three rows
-      let criteria = searchCriteria.length > 0 ? searchCriteria : []
-      
-      // If no criteria provided and there's a main search query, use it as keyword
+      // Initialize local state from global state but DO NOT persist until Search
+      let criteria = globalCriteria.length > 0 ? globalCriteria : []
       if (criteria.length === 0 && mainSearchQuery.trim()) {
         criteria = [
           { field: 'keyword', value: mainSearchQuery.trim(), operator: 'AND' },
@@ -58,20 +61,15 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
           { field: 'author', value: '', operator: 'AND' }
         ]
       }
-      
-      // Ensure minimum 3 rows and sort by content
       const processedCriteria = ensureMinimumCriteria(criteria)
-      setSearchCriteria(processedCriteria)
-      setFilters(initialFilters)
-      
+      setLocalCriteria(processedCriteria)
+      setLocalFilters(initialFilters)
       hasInitialized.current = true
     }
-    
-    // Reset initialization flag when modal closes
     if (!isOpen) {
       hasInitialized.current = false
     }
-  }, [isOpen, mainSearchQuery, searchCriteria, setSearchCriteria, setFilters, initialFilters])
+  }, [isOpen, mainSearchQuery, globalCriteria, initialFilters])
 
   const fieldOptions = [
     { value: 'keyword', label: 'Keyword' },
@@ -113,55 +111,44 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   ]
 
   const updateCriteria = (index: number, field: keyof SearchCriteria, value: string) => {
-    const newCriteria = [...searchCriteria]
+    const newCriteria = [...localCriteria]
     newCriteria[index] = { ...newCriteria[index], [field]: value }
     const processedCriteria = ensureMinimumCriteria(newCriteria)
-    setSearchCriteria(processedCriteria)
+    setLocalCriteria(processedCriteria)
   }
 
   const addCriteria = () => {
-    const newCriteria = [...searchCriteria, { field: 'keyword', value: '', operator: 'AND' }]
+    const newCriteria = [...localCriteria, { field: 'keyword', value: '', operator: 'AND' }]
     const processedCriteria = ensureMinimumCriteria(newCriteria)
-    setSearchCriteria(processedCriteria)
+    setLocalCriteria(processedCriteria)
   }
 
   const removeCriteria = (index: number) => {
-    // Don't allow removing rows if we only have 3 rows (the minimum)
-    if (searchCriteria.length > 3) {
-      const newCriteria = searchCriteria.filter((_, i) => i !== index)
+    if (localCriteria.length > 3) {
+      const newCriteria = localCriteria.filter((_, i) => i !== index)
       const processedCriteria = ensureMinimumCriteria(newCriteria)
-      setSearchCriteria(processedCriteria)
+      setLocalCriteria(processedCriteria)
     }
   }
 
   const handleSearch = () => {
-    const validCriteria = searchCriteria.filter(criteria => criteria.value.trim() !== '')
-    
-    // Update the global state with current criteria and filters
-    setSearchCriteria(validCriteria.length > 0 ? searchCriteria : [])
-    setFilters(filters)
-    
-    // Trigger the search
-    onSearch(validCriteria, filters)
+    const validCriteria = localCriteria.filter(criteria => criteria.value.trim() !== '')
+    // Persist to global atoms only here
+    setGlobalCriteria(validCriteria.length > 0 ? localCriteria : [])
+    setGlobalFilters(localFilters)
+    onSearch(validCriteria, localFilters)
     onClose()
   }
 
   const handleReset = () => {
-    // Reset to default 3 rows with empty values
     const defaultCriteria = [
       { field: 'keyword', value: '', operator: 'AND' },
       { field: 'title', value: '', operator: 'AND' },
       { field: 'author', value: '', operator: 'AND' }
     ]
-    
     const processedCriteria = ensureMinimumCriteria(defaultCriteria)
-    setSearchCriteria(processedCriteria)
-    setFilters({
-      yearFrom: '',
-      yearTo: '',
-      format: 'all',
-      language: 'all'
-    })
+    setLocalCriteria(processedCriteria)
+    setLocalFilters({ yearFrom: '', yearTo: '', format: 'all', language: 'all' })
   }
 
   if (!isOpen) return null
@@ -178,14 +165,14 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
         </div>
 
         <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
             {/* Search Criteria Section */}
             <div className="lg:col-span-2">
               <div className="space-y-4">
-                {searchCriteria.map((criteria, index) => (
-                  <div key={index} className="flex items-center gap-2">
+                {localCriteria.map((criteria, index) => (
+                  <div key={index} className="flex items-center gap-3">
                     <Select
-                      value={criteria.field}
+                      value={localCriteria[index].field}
                       onValueChange={(value) => updateCriteria(index, 'field', value)}
                     >
                       <SelectTrigger className="w-24">
@@ -202,15 +189,15 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
 
                     <Input
                       type="text"
-                      value={criteria.value}
+                      value={localCriteria[index].value}
                       onChange={(e) => updateCriteria(index, 'value', e.target.value)}
                       placeholder="Enter your search term"
-                      className="flex-1"
+                      className="flex-1 h-11"
                     />
 
-                    {index < searchCriteria.length - 1 && (
+                    {index < localCriteria.length - 1 && (
                       <Select
-                        value={criteria.operator}
+                        value={localCriteria[index].operator}
                         onValueChange={(value) => updateCriteria(index, 'operator', value)}
                       >
                         <SelectTrigger className="w-16">
@@ -226,13 +213,13 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                       </Select>
                     )}
 
-                    {index === searchCriteria.length - 1 && (
+                    {index === localCriteria.length - 1 && (
                       <Button onClick={addCriteria} variant="ghost" size="icon" aria-label="Add search criteria">
                         <Plus className="w-4 h-4" />
                       </Button>
                     )}
 
-                    {searchCriteria.length > 3 && (
+                    {localCriteria.length > 3 && (
                       <Button onClick={() => removeCriteria(index)} variant="ghost" size="icon" aria-label="Remove search criteria">
                         <X className="w-4 h-4" />
                       </Button>
@@ -244,29 +231,27 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
 
             {/* Filter Options Section */}
             <div className="space-y-4">
-                {/* Year Range */}
+                {/* Year Range (Slider) */}
                 <div>
                   <Label className="mb-2 text-left">Year</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      value={filters.yearFrom}
-                      onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
-                      placeholder="YYYY"
-                      min={1900}
-                      max={2030}
-                      className="w-24"
+                  <div className="px-1 py-3 border border-border rounded-md">
+                    <Slider
+                      value={[Number(localFilters.yearFrom || 2000), Number(localFilters.yearTo || 2025)]}
+                      min={2000}
+                      max={2025}
+                      step={1}
+                      onValueChange={(vals: number[]) =>
+                        setLocalFilters({
+                          ...localFilters,
+                          yearFrom: String(vals[0]),
+                          yearTo: String(vals[1]),
+                        })
+                      }
                     />
-                    <span className="text-sm text-muted-foreground">to</span>
-                    <Input
-                      type="number"
-                      value={filters.yearTo}
-                      onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
-                      placeholder="YYYY"
-                      min={1900}
-                      max={2030}
-                      className="w-24"
-                    />
+                    <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+                      <span>{localFilters.yearFrom || '2000'}</span>
+                      <span>{localFilters.yearTo || '2025'}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -274,8 +259,8 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 <div>
                   <Label className="mb-2 text-left">Format</Label>
                   <Select
-                    value={filters.format}
-                    onValueChange={(value) => setFilters({ ...filters, format: value })}
+                    value={localFilters.format}
+                    onValueChange={(value) => setLocalFilters({ ...localFilters, format: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -294,8 +279,8 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 <div>
                   <Label className="mb-2 text-left">Language</Label>
                   <Select
-                    value={filters.language}
-                    onValueChange={(value) => setFilters({ ...filters, language: value })}
+                    value={localFilters.language}
+                    onValueChange={(value) => setLocalFilters({ ...localFilters, language: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />

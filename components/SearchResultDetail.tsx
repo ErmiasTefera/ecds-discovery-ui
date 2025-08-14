@@ -20,9 +20,10 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import type { DetailResource } from '@/models'
-import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
+import { isResourceSavedAtom, toggleSaveResourceAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
 import CitationDialog from '@/components/CitationDialog'
+import ShareExportDialog from '@/components/ShareExportDialog'
 
 
 
@@ -39,6 +40,7 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
   const [showSaveModal, setShowSaveModal] = useState(false)
 
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
+  const [, toggleSave] = useAtom(toggleSaveResourceAtom)
 
   const getTypeIcon = (type: DetailResource['type']) => {
     switch (type) {
@@ -188,15 +190,9 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
             mla={formatCitation()}
             chicago={formatCitation()}
           />
+          <ShareExportDialog resource={resource} />
           <button
-            onClick={() => handleCopy(window.location.href, 'link')}
-            className="inline-flex items-center px-4 py-2 border border-border text-foreground rounded-md hover:bg-secondary transition-colors"
-          >
-            <Share className="w-4 h-4 mr-2" />
-            {copySuccess === 'link' ? 'Copied!' : 'Share'}
-          </button>
-          <button
-            onClick={() => setShowSaveModal(true)}
+            onClick={() => toggleSave({ resource })}
             className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
               isResourceSaved(resource.id)
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'

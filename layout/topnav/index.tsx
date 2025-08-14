@@ -8,6 +8,8 @@ import UserAvatar from '@/components/UserAvatar'
 import AuthButtons from '@/components/AuthButtons'
 import LanguageSelector from '@/components/LanguageSelector'
 import { HomeButton } from '@/components/HomeButton'
+import SavedMenu from '@/components/SavedMenu'
+import { usePathname } from 'next/navigation'
 
 const TopNavigation: React.FC = () => {
   return (
@@ -25,6 +27,8 @@ const TopNavigation: React.FC = () => {
               {/* Theme Toggle */}
               <ThemeToggle />
             </div>
+
+            <SavedMenu />
 
             {/* Authentication */}
             <UserAvatar />

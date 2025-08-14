@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// Removed next/font to avoid turbopack font resolution issues
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Provider } from 'jotai';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Fonts are loaded via CSS import in globals.css and applied through CSS variables
 
 export const metadata: Metadata = {
   title: "Discovery UI - Scholarly Resources Discovery Platform",
@@ -26,9 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`antialiased`}>
         <Provider>
           <ThemeProvider>
             {children}

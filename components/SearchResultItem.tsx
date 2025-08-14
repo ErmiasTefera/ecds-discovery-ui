@@ -7,7 +7,7 @@ import CitationDialog from '@/components/CitationDialog'
 import { useAtom } from 'jotai'
 import type { SearchResult } from '@/models'
 import { httpService } from '@/services/httpService'
-import { isResourceSavedAtom } from '@/atoms/collectionAtoms'
+import { isResourceSavedAtom, toggleSaveResourceAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
 
 
@@ -41,6 +41,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
   const [showSaveModal, setShowSaveModal] = useState(false)
 
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
+  const [, toggleSave] = useAtom(toggleSaveResourceAtom)
   const searchParams = useSearchParams()
 
   const handleGetAISummary = async () => {
@@ -253,7 +254,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
             </Link>
           )}
           <button
-            onClick={() => setShowSaveModal(true)}
+            onClick={() => toggleSave({ resource: result })}
             className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors ${
               isResourceSaved(result.id)
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'

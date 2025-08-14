@@ -3,7 +3,7 @@
 import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Copy } from 'lucide-react'
+import { Copy, Quote } from 'lucide-react'
 
 interface CitationDialogProps {
   triggerLabel?: string
@@ -28,7 +28,12 @@ const CitationDialog: React.FC<CitationDialogProps> = ({ triggerLabel = 'Cite', 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="md">{triggerLabel}</Button>
+        <button
+            className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors border border-border hover:bg-secondary`}
+          >
+            <Quote className="w-4 h-4 mr-2" />
+            {triggerLabel}
+          </button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>

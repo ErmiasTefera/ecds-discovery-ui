@@ -213,3 +213,50 @@ export const isResourceSavedAtom = atom(
     return savedResources.some(saved => saved.resourceId === resourceId)
   }
 )
+
+// Toggle save/unsave a resource (in-memory mock)
+export const toggleSaveResourceAtom = atom(
+  null,
+  async (get, set, payload: { resource: any }) => {
+    const saved = get(savedResourcesAtom)
+    const existing = saved.find(s => s.resourceId === payload.resource.id)
+    if (existing) {
+      // Unsave
+      set(savedResourcesAtom, saved.filter(s => s.resourceId !== payload.resource.id))
+      return { saved: false }
+    }
+    // Save to a default collection (first or create a temp one)
+    const collections = get(collectionsAtom)
+    const targetCollection = collections[0] || {
+      id: 'collection-quick',
+      name: 'Saved',
+      description: 'Quick saved resources',
+      isPublic: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      resourceCount: 0,
+      userId: '1'
+    }
+    if (!collections[0]) {
+      set(collectionsAtom, [targetCollection])
+    }
+    const newSaved: SavedResource = {
+      id: `saved-${Date.now()}`,
+      resourceId: payload.resource.id,
+      collectionId: targetCollection.id,
+      savedAt: new Date().toISOString(),
+      userId: '1',
+      resource: {
+        id: payload.resource.id,
+        title: payload.resource.title,
+        authors: payload.resource.authors || [],
+        type: payload.resource.type,
+        year: payload.resource.year,
+        journal: payload.resource.journal,
+        publisher: payload.resource.publisher,
+      }
+    }
+    set(savedResourcesAtom, [...saved, newSaved])
+    return { saved: true }
+  }
+)
