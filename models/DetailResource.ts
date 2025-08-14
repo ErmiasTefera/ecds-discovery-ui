@@ -9,9 +9,11 @@ export interface DetailResource {
   description: string
   doi?: string
   url?: string
+  thumbnailUrl?: string
   tags: string[]
   downloadCount: number
   citationCount: number
+  viewCount?: number
   abstract?: string
   keywords?: string[]
   pages?: string

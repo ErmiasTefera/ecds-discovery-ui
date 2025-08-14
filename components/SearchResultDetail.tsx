@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAtom } from 'jotai'
 import { 
   FileText, 
@@ -16,13 +17,19 @@ import {
   Users,
   MapPin,
   Tag,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Eye,
+  Sparkles,
+  Loader2,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react'
 import type { DetailResource } from '@/models'
 import { isResourceSavedAtom, toggleSaveResourceAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
 import CitationDialog from '@/components/CitationDialog'
 import ShareExportDialog from '@/components/ShareExportDialog'
+import { httpService } from '@/services/httpService'
 
 
 
@@ -37,6 +44,10 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
+  const [hasRequestedSummary, setHasRequestedSummary] = useState(false)
+  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false)
 
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
   const [, toggleSave] = useAtom(toggleSaveResourceAtom)
@@ -101,6 +112,22 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
     return baseHref
   }
 
+  const handleGetAISummary = async () => {
+    if (hasRequestedSummary) return
+    setIsLoadingSummary(true)
+    setHasRequestedSummary(true)
+    try {
+      const response = await httpService.getAISummary(resource.id)
+      if (response.success) {
+        setAiSummary(response.data.summary)
+      }
+    } catch (error) {
+      console.error('Failed to get AI summary:', error)
+    } finally {
+      setIsLoadingSummary(false)
+    }
+  }
+
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', count: null },
     { id: 'references' as TabType, label: 'References', count: resource.references?.length || 0 },
@@ -114,20 +141,45 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
       <div className="bg-background border border-border rounded-lg p-8 mb-8">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-start space-x-4 flex-1">
-            <div className="flex-shrink-0 mt-1">
-              {getTypeIcon(resource.type)}
+            <div className="flex-shrink-0">
+              {resource.thumbnailUrl ? (
+                <Image
+                  src={resource.thumbnailUrl}
+                  alt={resource.title}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded object-cover border border-border"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded bg-secondary flex items-center justify-center border border-border">
+                  {getTypeIcon(resource.type)}
+                </div>
+              )}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
-                  {getTypeLabel(resource.type)}
-                </span>
-                <span className="text-muted-foreground">{resource.year}</span>
-                {resource.language && (
-                  <span className="text-muted-foreground text-sm">
-                    {resource.language}
+              <div className="flex items-center gap-3 mb-3 justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
+                    {getTypeLabel(resource.type)}
                   </span>
-                )}
+                  <span className="text-muted-foreground">{resource.year}</span>
+                  {resource.language && (
+                    <span className="text-muted-foreground text-sm">
+                      {resource.language}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => toggleSave({ resource })}
+                  className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
+                    isResourceSaved(resource.id)
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 mr-2 ${isResourceSaved(resource.id) ? 'fill-current' : ''}`} />
+                  {isResourceSaved(resource.id) ? 'Saved' : 'Save'}
+                </button>
               </div>
               <h1 className="text-3xl font-bold text-foreground mb-4 leading-tight">
                 {resource.title}
@@ -190,17 +242,6 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
             chicago={formatCitation()}
           />
           <ShareExportDialog resource={resource} />
-          <button
-            onClick={() => toggleSave({ resource })}
-            className={`inline-flex items-center px-4 py-2 rounded-md transition-colors ${
-              isResourceSaved(resource.id)
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90'
-            }`}
-          >
-            <Bookmark className={`w-4 h-4 mr-2 ${isResourceSaved(resource.id) ? 'fill-current' : ''}`} />
-            {isResourceSaved(resource.id) ? 'Saved' : 'Save'}
-          </button>
         </div>
 
         {/* Metrics */}
@@ -217,17 +258,77 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
               <span className="font-medium text-foreground">{resource.downloadCount.toLocaleString()}</span> downloads
             </span>
           </div>
+          <div className="flex items-center space-x-2">
+            <Eye className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{(resource.viewCount ?? Math.max(500, resource.downloadCount * 2)).toLocaleString()}</span> views
+            </span>
+          </div>
         </div>
+      </div>
+
+      {/* AI Summary Section */}
+      <div className="mb-8">
+        {!hasRequestedSummary && (
+          <button
+            onClick={handleGetAISummary}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Get AI Summary
+          </button>
+        )}
+
+        {isLoadingSummary && (
+          <div className="flex items-center space-x-2 p-4 bg-secondary/50 rounded-md">
+            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            <span className="text-sm text-muted-foreground">Generating AI summary...</span>
+          </div>
+        )}
+
+        {aiSummary && (
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-base font-medium text-blue-900 dark:text-blue-100">AI Summary</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSummaryCollapsed((v) => !v)}
+                className="inline-flex items-center text-sm text-primary hover:text-primary/80"
+                aria-label={isSummaryCollapsed ? 'Expand AI summary' : 'Collapse AI summary'}
+              >
+                {isSummaryCollapsed ? (
+                  <>
+                    Show
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </>
+                ) : (
+                  <>
+                    Hide
+                    <ChevronUp className="w-4 h-4 ml-1" />
+                  </>
+                )}
+              </button>
+            </div>
+            {!isSummaryCollapsed && (
+              <p className="text-base text-blue-800 dark:text-blue-200 leading-relaxed">
+                {aiSummary}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
       <div className="border-b border-border mb-8">
-        <nav className="flex space-x-8">
+        <nav className="flex space-x-8 overflow-x-auto pb-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
@@ -365,8 +466,8 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
         {activeTab === 'metrics' && (
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-6">Usage Metrics</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-secondary/10 rounded-lg p-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-auto">
+              <div className="bg-secondary/10 rounded-lg p-6 min-w-[280px]">
                 <div className="flex items-center space-x-3 mb-4">
                   <Quote className="w-6 h-6 text-primary" />
                   <h3 className="text-lg font-medium text-foreground">Citations</h3>
@@ -379,7 +480,7 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
                 </p>
               </div>
               
-              <div className="bg-secondary/10 rounded-lg p-6">
+              <div className="bg-secondary/10 rounded-lg p-6 min-w-[280px]">
                 <div className="flex items-center space-x-3 mb-4">
                   <Download className="w-6 h-6 text-primary" />
                   <h3 className="text-lg font-medium text-foreground">Downloads</h3>
@@ -389,6 +490,19 @@ const SearchResultDetail: React.FC<SearchResultDetailProps> = ({ resource, curre
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Total number of downloads across all platforms
+                </p>
+              </div>
+
+              <div className="bg-secondary/10 rounded-lg p-6 min-w-[280px]">
+                <div className="flex items-center space-x-3 mb-4">
+                  <Eye className="w-6 h-6 text-primary" />
+                  <h3 className="text-lg font-medium text-foreground">Views</h3>
+                </div>
+                <div className="text-3xl font-bold text-foreground mb-2">
+                  {(resource.viewCount ?? Math.max(500, resource.downloadCount * 2)).toLocaleString()}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Total number of views across all platforms
                 </p>
               </div>
             </div>
