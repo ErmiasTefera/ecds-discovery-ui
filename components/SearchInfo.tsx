@@ -12,8 +12,7 @@ import {
 } from '@/atoms/searchAtoms'
 import SortControls from '@/components/SortControls'
 import ActiveFilters from './ActiveFilters'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { Filter as FilterIcon } from 'lucide-react'
+ 
 
 const SearchInfo: React.FC = () => {
   const [query] = useAtom(searchQueryAtom)
@@ -34,8 +33,8 @@ const SearchInfo: React.FC = () => {
     : totalResults === 0
     ? 'No results found'
     : totalResults <= resultsPerPage
-    ? `Showing ${totalResults} of ${totalResults} Results`
-    : `Showing ${startIndex}-${endIndex} of ${totalResults} Results`
+    ? `Showing ${totalResults} of ${totalResults} Results ${query ? ` for “${query}”` : ''}`
+    : `Showing ${startIndex}-${endIndex} of ${totalResults} Results ${query ? ` for “${query}”` : ''}`
 
   // Build applied chips for a more visual summary
   const criteriaChips = advancedCriteria
@@ -68,46 +67,9 @@ const SearchInfo: React.FC = () => {
   return (
     <div className="mb-6">
       <div className="">
-        {query && (
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-            Search Results for 
-            <span className="text-primary"> “{query}”</span>
-          </h1>
-        )}
-
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">{infoText}</p>
-          <div className="flex items-center gap-3">
-            <SortControls />
-          </div>
         </div>
-
-        <Collapsible defaultOpen>
-          <div className="mt-3 flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Filters</p>
-            <CollapsibleTrigger
-              aria-label="Toggle filters"
-              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
-            >
-              <FilterIcon className="w-4 h-4" />
-              <span className="sr-only">Toggle filters</span>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent>
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-              {isAdvancedSearchActive && (criteriaChips.length > 0 || filterChips.length > 0) && (
-                <div className="p-3 rounded-lg border border-border bg-secondary/10">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Advanced Filters</p>
-                  <div className="flex flex-wrap gap-2">
-                    {criteriaChips}
-                    {filterChips}
-                  </div>
-                </div>
-              )}
-              <ActiveFilters />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
       </div>
     </div>
   )

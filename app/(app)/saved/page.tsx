@@ -24,7 +24,7 @@ export default function SavedPage() {
         {savedResources.length === 0 ? (
           <div className="text-center py-16 border border-dashed border-border rounded-lg">
             <Bookmark className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground">You haven't saved any resources yet.</p>
+            <p className="text-muted-foreground">You haven&apos;t saved any resources yet.</p>
             <p className="text-sm text-muted-foreground">Browse and click Save on results to add them here.</p>
           </div>
         ) : (
@@ -41,7 +41,7 @@ export default function SavedPage() {
                     </p>
                   </div>
                   <button
-                    onClick={() => toggleSave({ resource: { id: saved.resourceId, ...saved.resource } })}
+                    onClick={() => toggleSave({ resource: { ...saved.resource } })}
                     className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md border border-border hover:bg-secondary transition-colors"
                   >
                     <Bookmark className="w-3 h-3 mr-1" />

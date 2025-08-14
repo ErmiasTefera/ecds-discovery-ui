@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAtom } from 'jotai'
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { 
   userAtom, 
   loginAtom, 
@@ -75,14 +75,7 @@ const SignInPage: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <Link 
-            href="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Discovery UI
-          </Link>
-          
+        
           <div className="flex items-center justify-center mb-6">
             <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-xl">
               <Mail className="w-6 h-6 text-primary-foreground" />

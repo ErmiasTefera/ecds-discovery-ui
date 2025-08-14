@@ -13,7 +13,6 @@ import {
   draftSelectedFiltersAtom,
 } from '@/atoms/filterAtoms'
 import { Button } from '@/components/ui/button'
-import FilterDialog from './FilterDialog'
 
 const ActiveFilters: React.FC = () => {
   const [selectedFilters] = useAtom(selectedFiltersAtom)
@@ -81,9 +80,6 @@ const ActiveFilters: React.FC = () => {
           >
             Clear all
           </Button>
-        </div>
-        <div className="lg:hidden">
-          <FilterDialog />
         </div>
       </div>
       <div className="flex flex-wrap gap-2">{renderSelectedChips()}</div>

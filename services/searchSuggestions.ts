@@ -14,117 +14,117 @@ export interface MockResult {
 export const mockSuggestionsDatabase: MockResult[] = [
   {
     id: '1',
-    title: 'Machine Learning Applications in Healthcare: A Comprehensive Review',
-    authors: ['Smith, J.', 'Johnson, M.'],
+    title: 'Community-Based Interventions to Reduce Maternal Mortality',
+    authors: ['Ayele, M.', 'Johnson, M.'],
     year: 2023,
     type: 'article',
-    journal: 'Journal of Medical AI'
+    journal: 'International Journal of Maternal Health'
   },
   {
     id: '2',
-    title: 'Deep Learning for Computer Vision: Theory and Practice',
+    title: 'Health Policy and Management: Strengthening Primary Care',
     authors: ['Chen, L.', 'Williams, R.'],
     year: 2022,
     type: 'book',
-    publisher: 'Academic Press'
+    publisher: 'Global Health Press'
   },
   {
     id: '3',
-    title: 'Climate Change Impact on Global Food Security',
+    title: 'Ambient Air Pollution and Cardiovascular Risk',
     authors: ['Anderson, K.'],
     year: 2023,
     type: 'article',
-    journal: 'Environmental Science Today'
+    journal: 'Environmental Health Perspectives'
   },
   {
     id: '4',
-    title: 'Quantum Computing Algorithms for Optimization Problems',
+    title: 'Integrating Pharmacovigilance Systems in Low-Resource Settings',
     authors: ['Zhang, Y.', 'Brown, A.', 'Davis, P.'],
     year: 2024,
     type: 'thesis'
   },
   {
     id: '5',
-    title: 'Artificial Intelligence Ethics in Modern Society',
+    title: 'Nutrition Interventions to Reduce Stunting',
     authors: ['Wilson, S.'],
     year: 2023,
     type: 'book',
-    publisher: 'Ethics Publications'
+    publisher: 'Global Nutrition Initiative'
   },
   {
     id: '6',
-    title: 'Neural Networks for Natural Language Processing',
+    title: 'Field Epidemiology Methods for Outbreak Investigation',
     authors: ['Martinez, C.', 'Lee, H.'],
     year: 2022,
     type: 'article',
-    journal: 'Computational Linguistics Review'
+    journal: 'Journal of Field Epidemiology'
   },
   {
     id: '7',
-    title: 'Blockchain Technology in Supply Chain Management',
+    title: 'HIV/TB Co-infection Management in Resource-Limited Settings',
     authors: ['Thompson, R.', 'Garcia, M.'],
     year: 2023,
     type: 'article',
-    journal: 'International Journal of Operations Management'
+    journal: 'International Journal of Infectious Diseases'
   },
   {
     id: '8',
-    title: 'Sustainable Energy Systems: Renewable Technologies',
+    title: 'Health Systems Strengthening in Ethiopia',
     authors: ['O\'Connor, P.', 'Singh, A.'],
     year: 2022,
     type: 'book',
-    publisher: 'Green Energy Press'
+    publisher: 'Ethiopian Public Health Institute'
   },
   {
     id: '9',
-    title: 'Mental Health Interventions in Digital Age',
+    title: 'Integration of Mental Health into Primary Health Care',
     authors: ['Davis, E.', 'Wang, L.'],
     year: 2024,
     type: 'article',
-    journal: 'Journal of Clinical Psychology'
+    journal: 'Journal of Global Mental Health'
   },
   {
     id: '10',
-    title: 'Urban Planning and Smart Cities: Data-Driven Approaches',
+    title: 'Epidemiology of Non-Communicable Diseases in Urban Settings',
     authors: ['Johnson, A.', 'Brown, K.'],
     year: 2023,
     type: 'article',
-    journal: 'Urban Studies Quarterly'
+    journal: 'Urban Health Quarterly'
   },
   {
     id: '11',
-    title: 'Microbiome Research in Human Health: From Gut to Brain',
+    title: 'Biostatistics for Public Health Research',
     authors: ['White, S.', 'Chen, H.'],
     year: 2022,
     type: 'book',
-    publisher: 'Medical Science Publishers'
+    publisher: 'Public Health Texts'
   },
   {
     id: '12',
-    title: 'Cybersecurity in Critical Infrastructure',
+    title: 'Determinants of Vaccine Hesitancy in Adolescents',
     authors: ['Taylor, R.', 'Gonzalez, P.'],
     year: 2024,
     type: 'thesis'
   },
   {
     id: '13',
-    title: 'Economic Impact of Remote Work: Productivity and Well-being',
+    title: 'Cost-Effectiveness of Hypertension Treatment Protocols',
     authors: ['Wilson, K.', 'Martinez, D.'],
     year: 2023,
     type: 'article',
-    journal: 'Journal of Organizational Behavior'
+    journal: 'Health Economics and Policy'
   },
   {
     id: '14',
-    title: 'Advanced Materials for Energy Storage',
+    title: 'WASH Programs and Child Health Outcomes',
     authors: ['Kim, Y.', 'Zhang, W.'],
     year: 2022,
     type: 'article',
-    journal: 'Materials Science and Engineering'
+    journal: 'Global Environmental Health'
   },
   {
     id: '15',
-    title: 'Digital Transformation in Healthcare: Telemedicine and AI',
+    title: 'Digital Health Interventions for Community Health Workers',
     authors: ['Patel, A.', 'Garcia, R.'],
     year: 2024,
     type: 'article',
@@ -132,82 +132,82 @@ export const mockSuggestionsDatabase: MockResult[] = [
   },
   {
     id: '16',
-    title: 'Social Media and Political Polarization',
+    title: 'Pharmacology of Antimalarial Drugs',
     authors: ['Brown, C.', 'Johnson, E.'],
     year: 2023,
     type: 'article',
-    journal: 'Political Communication Studies'
+    journal: 'Tropical Medicine and Pharmacology'
   },
   {
     id: '17',
-    title: 'Robotics in Manufacturing: Industry 4.0',
+    title: 'Occupational Health and Safety in Manufacturing',
     authors: ['Miller, G.', 'Anderson, P.'],
     year: 2022,
     type: 'book',
-    publisher: 'Industrial Technology Press'
+    publisher: 'Occupational Health Press'
   },
   {
     id: '18',
-    title: 'Environmental Economics: Carbon Pricing Solutions',
+    title: 'Nutrition Transition and Obesity in Emerging Economies',
     authors: ['Rodriguez, S.', 'Wang, T.'],
     year: 2024,
     type: 'article',
-    journal: 'Environmental Economics Quarterly'
+    journal: 'Public Health Nutrition'
   },
   {
     id: '19',
-    title: 'Neuroscience of Learning: Cognitive Enhancement',
+    title: 'Climate Variability and Vector-Borne Disease Risk',
     authors: ['Lee, V.', 'Gonzalez, W.'],
     year: 2023,
     type: 'article',
-    journal: 'Educational Neuroscience'
+    journal: 'Environmental Health and Epidemiology'
   },
   {
     id: '20',
-    title: 'Space Exploration Technologies: Mars Mission Planning',
+    title: 'Medical Ethics in Clinical Research',
     authors: ['White, Z.', 'Chen, A.'],
     year: 2022,
     type: 'article',
-    journal: 'Space Science and Technology'
+    journal: 'Journal of Medical Ethics'
   },
   {
     id: '21',
-    title: 'Financial Technology and Digital Banking',
+    title: 'Primary Healthcare Financing and UHC',
     authors: ['Taylor, C.', 'Johnson, D.'],
     year: 2024,
     type: 'book',
-    publisher: 'Financial Technology Press'
+    publisher: 'Health Systems Press'
   },
   {
     id: '22',
-    title: 'Biodiversity Conservation in Urban Environments',
+    title: 'Reproductive Health and Family Planning Uptake',
     authors: ['Anderson, F.', 'Wang, G.'],
     year: 2023,
     type: 'article',
-    journal: 'Urban Ecology and Conservation'
+    journal: 'Reproductive Health Studies'
   },
   {
     id: '23',
-    title: 'Quantum Machine Learning: Drug Discovery Applications',
+    title: 'Emergency and Disaster Preparedness in Health Systems',
     authors: ['Kim, I.', 'Garcia, J.'],
     year: 2024,
     type: 'thesis'
   },
   {
     id: '24',
-    title: 'Social Psychology of Online Communities',
+    title: 'Epidemiology of Road Traffic Injuries',
     authors: ['Miller, L.', 'Rodriguez, M.'],
     year: 2023,
     type: 'article',
-    journal: 'Social Psychology Quarterly'
+    journal: 'Injury Prevention and Control'
   },
   {
     id: '25',
-    title: 'Advanced Manufacturing Processes: 3D Printing',
+    title: 'Epidemiological Methods in Public Health',
     authors: ['Thompson, O.', 'Chen, P.'],
     year: 2022,
     type: 'article',
-    journal: 'Manufacturing Technology Review'
+    journal: 'Public Health Methods Review'
   }
 ]
 

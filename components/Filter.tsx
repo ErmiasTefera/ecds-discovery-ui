@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { getFilters } from '@/services'
 import type { FilterOption } from '@/models'
+import { Badge } from './ui/badge'
 import { useAtom } from 'jotai'
 import {
   filtersAtom,
@@ -18,6 +19,8 @@ import {
   resetDraftFiltersAtom,
   editModeAtom,
 } from '@/atoms/filterAtoms'
+import SortControls from './SortControls'
+import ActiveFilters from './ActiveFilters'
 // ActiveFilters is used elsewhere; Filter focuses on groups and selection
 
 const Filter: React.FC = () => {
@@ -98,18 +101,29 @@ const Filter: React.FC = () => {
   return (
     <div className="bg-background border border-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Filters</h2>
+        <h2 className="text-lg font-semibold text-foreground">Refine Results</h2>
+      </div>
+      
+      <ActiveFilters />
+
+      <div className='mt-4 flex items-center justify-between'>
+      <SortControls/>
       </div>
 
       {/* Filter Groups */}
-      <div className="space-y-4">
+      <div className="mt-4 space-y-4">
         {filters.map((group) => (
           <div key={group.id} className="border-b border-border pb-4 last:border-b-0">
             <button
               onClick={() => toggleGroup(group.id)}
               className="flex items-center justify-between w-full text-left mb-3"
             >
-              <h3 className="text-sm font-medium text-foreground">{group.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium text-foreground">{group.title}</h3>
+                {!!(selectedFilters[group.id]?.length) && (
+                  <Badge className="bg-primary/10 text-primary">{selectedFilters[group.id].length}</Badge>
+                )}
+              </div>
               {expandedGroups[group.id] ? (
                 <ChevronUp className="w-4 h-4 text-muted-foreground" />
               ) : (

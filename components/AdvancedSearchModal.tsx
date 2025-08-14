@@ -44,7 +44,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
 }) => {
   // Global atoms (persisted when user clicks Search)
   const [globalCriteria, setGlobalCriteria] = useAtom(advancedSearchCriteriaAtom)
-  const [globalFilters, setGlobalFilters] = useAtom(advancedSearchFiltersAtom)
+  const [, setGlobalFilters] = useAtom(advancedSearchFiltersAtom)
   // Local, non-persisted modal state
   const [localCriteria, setLocalCriteria] = React.useState<SearchCriteria[]>([])
   const [localFilters, setLocalFilters] = React.useState<AdvancedSearchFilters>(initialFilters)
@@ -151,6 +151,40 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     setLocalFilters({ yearFrom: '', yearTo: '', format: 'all', language: 'all' })
   }
 
+  // --- Preview builders ---
+  const getFieldLabel = (value: string) => fieldOptions.find(o => o.value === value)?.label || value
+  const getFormatLabel = (value: string) => formatOptions.find(o => o.value === value)?.label || value
+  const getLanguageLabel = (value: string) => languageOptions.find(o => o.value === value)?.label || value
+
+  const buildCriteriaPreview = () => {
+    const filled = localCriteria.filter(c => c.value.trim().length > 0)
+    if (filled.length === 0) return 'Add criteria to see a combined query preview.'
+
+    let preview = ''
+    filled.forEach((criteria, index) => {
+      const token = `(${getFieldLabel(criteria.field)}: "${criteria.value.trim()}")`
+      if (index === 0) {
+        preview = token
+      } else {
+        const joinOperator = filled[index - 1].operator === 'NOT' ? 'AND NOT' : filled[index - 1].operator || 'AND'
+        preview += ` ${joinOperator} ${token}`
+      }
+    })
+    return preview
+  }
+
+  const buildFilterBadges = (): string[] => {
+    const badges: string[] = []
+    if (localFilters.format && localFilters.format !== 'all') badges.push(`Format: ${getFormatLabel(localFilters.format)}`)
+    if (localFilters.language && localFilters.language !== 'all') badges.push(`Language: ${getLanguageLabel(localFilters.language)}`)
+    if (localFilters.yearFrom || localFilters.yearTo) {
+      const from = localFilters.yearFrom || '2000'
+      const to = localFilters.yearTo || '2025'
+      badges.push(`Year: ${from}–${to}`)
+    }
+    return badges
+  }
+
   if (!isOpen) return null
 
   return (
@@ -200,7 +234,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                         value={localCriteria[index].operator}
                         onValueChange={(value) => updateCriteria(index, 'operator', value)}
                       >
-                        <SelectTrigger className="w-16">
+                        <SelectTrigger className="">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -226,6 +260,22 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                     )}
                   </div>
                 ))}
+              </div>
+              {/* Live Search Preview */}
+              <div className="mt-6 p-4 border border-border rounded-md bg-secondary/30">
+                <div className="text-sm font-semibold text-foreground mb-2">Search preview</div>
+                <p className="text-sm text-muted-foreground break-words">
+                  {buildCriteriaPreview()}
+                </p>
+                {buildFilterBadges().length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {buildFilterBadges().map((badge) => (
+                      <span key={badge} className="px-2 py-1 text-xs rounded-md bg-primary/10 text-primary border border-primary/20">
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

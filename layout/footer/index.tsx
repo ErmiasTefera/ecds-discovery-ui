@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Discovery UI. All rights reserved.
+              © {currentYear} IPHCE RC Discovery Access. All rights reserved.
             </div>
 
             {/* Version */}

@@ -21,7 +21,6 @@ const FilterDialog: React.FC = () => {
       </DialogTrigger>
       <DialogContent className="p-0" onOpenAutoFocus={() => { setEditMode('dialog'); resetDraft() }}>
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>Filters</DialogTitle>
         </DialogHeader>
         <div className="p-4 max-h-[70vh] overflow-y-auto">
           <Filter />

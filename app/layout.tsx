@@ -7,7 +7,7 @@ import { Provider } from 'jotai';
 // Fonts are loaded via CSS import in globals.css and applied through CSS variables
 
 export const metadata: Metadata = {
-  title: "Discovery UI - Scholarly Resources Discovery Platform",
+  title: "IPHCE RC Discovery Access - Scholarly Resources Discovery Platform",
   description: "Unified access to scholarly resources from library catalogs, institutional repositories, subscription databases, and open-access archives.",
 };
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAtom } from 'jotai'
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
 import { 
   userAtom, 
   signupAtom, 
@@ -89,15 +89,7 @@ const SignUpPage: React.FC = () => {
     <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
-        <div className="text-center">
-          <Link 
-            href="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Discovery UI
-          </Link>
-          
+        <div className="text-center">          
           <div className="flex items-center justify-center mb-6">
             <div className="flex items-center justify-center w-12 h-12 bg-primary rounded-xl">
               <User className="w-6 h-6 text-primary-foreground" />
@@ -108,7 +100,7 @@ const SignUpPage: React.FC = () => {
             Create account
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Join Discovery UI to access scholarly resources
+            Join IPHCE RC Discovery to access scholarly resources
           </p>
         </div>
 

@@ -32,6 +32,7 @@ const SortControls: React.FC = () => {
 
   return (
     <div className="flex items-center gap-2">
+      <span className="text-sm font-medium text-foreground">Sort by:</span>
       <Select value={sortBy} onValueChange={(value) => handleSortChange(value as SortOption)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="Select sort option" />

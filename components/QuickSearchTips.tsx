@@ -6,10 +6,18 @@ interface QuickSearchTipsProps {
 }
 
 const DEFAULT_TERMS = [
-  'machine learning',
-  'climate change',
-  'quantum computing',
-  'artificial intelligence',
+  'Public Health',
+  'Maternal and Child Health',
+  'Infectious Diseases',
+  'Non-Communicable Diseases',
+  'Health Policy & Management',
+  'Environmental Health',
+  'Nutrition',
+  'Pharmacology',
+  'Medical Ethics',
+  'Ethiopian Health System',
+  'Epidemiology',
+  'Biostatistics',
 ]
 
 const QuickSearchTips: React.FC<QuickSearchTipsProps> = ({ terms = DEFAULT_TERMS, onSelect }) => {
