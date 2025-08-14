@@ -15,6 +15,7 @@ import {
 } from "@/atoms/searchAtoms";
 import SearchInfo from "@/components/SearchInfo";
 import ViewModeToggle from "@/components/ViewModeToggle";
+import ExportResultsButton from "@/components/ExportResultsButton";
 import SearchResults from "@/components/SearchResults";
 import Pagination from "@/components/Pagination";
 
@@ -24,6 +25,7 @@ import {
   draftSelectedFiltersAtom,
 } from "@/atoms/filterAtoms";
 import FilterDialog from "@/components/FilterDialog";
+import SortControls from "@/components/SortControls";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -54,10 +56,8 @@ export default function SearchPage() {
     );
     setHasUrlAdvanced(advancedPresent);
 
-    // Set hasSearched to true if there's a query parameter or advanced search parameters
-    if (urlQuery || advancedPresent) {
-      setHasSearched(true);
-    }
+    // Show results even without a query: empty query lists all results
+    setHasSearched(true);
 
     if (criteriaParam) {
       try {
@@ -109,14 +109,15 @@ export default function SearchPage() {
   // Fetch search results
   useEffect(() => {
     const fetchResults = async () => {
-      if (!hasSearched || (!committedQuery && !hasUrlAdvanced)) {
+      if (!hasSearched) {
         setSearchResults([]);
         return;
       }
 
       setResultsLoading(true);
       try {
-        let results = await searchResources(committedQuery);
+        // If no committed query, fetch all and then apply any advanced filter logic
+        let results = await searchResources(committedQuery || "");
 
         // Apply advanced search filters if present
         if (advancedFilters.format !== "all") {
@@ -175,10 +176,10 @@ export default function SearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Header */}
         <div className="mb-8">
-          <SearchComponent initialQuery={query} />
+          <SearchComponent initialQuery={query} showQuickTips={false} />
         </div>
 
-        {hasSearched && (committedQuery || hasUrlAdvanced) && (
+        {hasSearched && (
           <>
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Filters Sidebar (hidden on lg and below) */}
@@ -194,8 +195,15 @@ export default function SearchPage() {
                     <div className="lg:hidden">
                       <FilterDialog />
                     </div>
-                    <ViewModeToggle />
+                    <div className="hidden lg:flex items-center gap-2">
+                      <ExportResultsButton />
+                      <ViewModeToggle />
+                    </div>
                   </div>
+                </div>
+
+                <div className="flex items-end justify-between mb-4 lg:hidden">
+                  <SortControls />
                 </div>
 
                 <SearchResults />
@@ -207,7 +215,7 @@ export default function SearchPage() {
         )}
 
         {/* Empty State */}
-        {!query && (
+        {!hasSearched && (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Start Your Search

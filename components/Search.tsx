@@ -12,7 +12,6 @@ import QuickSearchTips from '@/components/QuickSearchTips'
 import { Input } from '@/components/ui/input'
 import { useAtom } from 'jotai'
 import { 
-  searchQueryAtom, 
   advancedSearchCriteriaAtom, 
   advancedSearchFiltersAtom,
   searchLoadingAtom,
@@ -24,6 +23,7 @@ interface SearchProps {
   placeholder?: string
   className?: string
   initialQuery?: string
+  showQuickTips?: boolean
 }
 
 
@@ -31,9 +31,9 @@ interface SearchProps {
 const Search: React.FC<SearchProps> = ({ 
   placeholder = "Search",
   className = "",
-  initialQuery
+  initialQuery,
+  showQuickTips = true
 }) => {
-  const [query, setQuery] = useAtom(searchQueryAtom)
   const [isLoading, setIsLoading] = useAtom(searchLoadingAtom)
   const [, setAdvancedCriteria] = useAtom(advancedSearchCriteriaAtom)
   const [advancedFilters, setAdvancedFilters] = useAtom(advancedSearchFiltersAtom)
@@ -135,6 +135,13 @@ const Search: React.FC<SearchProps> = ({
     router.push(`/search?${searchParams.toString()}`)
     
     setIsLoading(false)
+    // Close suggestions after search
+    setIsFocused(false)
+    setFilteredResults([])
+    setSelectedIndex(-1)
+    if (inputRef.current) {
+      inputRef.current.blur()
+    }
   }, [router, setIsLoading, setAdvancedFilters])
 
   const handleAdvancedSearch = useCallback((criteria: SearchCriteria[], filters: AdvancedSearchFilters) => {
@@ -159,6 +166,13 @@ const Search: React.FC<SearchProps> = ({
     
     router.push(`/search?${searchParams.toString()}`)
     setIsLoading(false)
+    // Close suggestions after advanced search
+    setIsFocused(false)
+    setFilteredResults([])
+    setSelectedIndex(-1)
+    if (inputRef.current) {
+      inputRef.current.blur()
+    }
   }, [router, inputValue, setIsLoading])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -279,7 +293,9 @@ const Search: React.FC<SearchProps> = ({
       <AdvancedSearchTrigger onOpen={() => setIsAdvancedSearchOpen(true)} />
 
       {/* Quick Search Tips */}
-      <QuickSearchTips onSelect={(term) => setInputValue(term)} />
+      {showQuickTips && (
+        <QuickSearchTips onSelect={(term) => handleSearch(term)} />
+      )}
 
       {/* Advanced Search Modal */}
       <AdvancedSearchModal

@@ -55,7 +55,7 @@ export default function Home() {
 
             {/* Search Component */}
             <div className="mb-12">
-              <SearchComponent />
+              <SearchComponent showQuickTips={true} />
             </div>
 
             {/* Quick Stats */}

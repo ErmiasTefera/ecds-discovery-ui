@@ -13,4 +13,5 @@ export interface SearchResult {
   tags: string[]
   downloadCount: number
   citationCount: number
+  viewCount?: number
 }

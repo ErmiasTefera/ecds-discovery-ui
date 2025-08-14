@@ -11,7 +11,6 @@ import {
   Download, 
   Quote, 
   Copy, 
-  Share,
   Bookmark,
   Calendar,
   Users,

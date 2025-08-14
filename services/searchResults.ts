@@ -16,6 +16,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=1&size=128',
     tags: ['maternal health', 'public health', 'Africa', 'interventions'],
     downloadCount: 1247,
+    viewCount: 4321,
     citationCount: 89
   },
   {
@@ -30,6 +31,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=2&size=128',
     tags: ['health policy', 'management', 'primary care', 'systems'],
     downloadCount: 2341,
+    viewCount: 6543,
     citationCount: 156
   },
   {
@@ -45,6 +47,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=3&size=128',
     tags: ['environmental health', 'air pollution', 'cardiovascular disease', 'PM2.5'],
     downloadCount: 892,
+    viewCount: 2410,
     citationCount: 67
   },
   {
@@ -58,6 +61,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=4&size=128',
     tags: ['pharmacovigilance', 'drug safety', 'health systems'],
     downloadCount: 543,
+    viewCount: 1712,
     citationCount: 23
   },
   {
@@ -72,6 +76,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=5&size=128',
     tags: ['nutrition', 'stunting', 'maternal and child health', 'implementation'],
     downloadCount: 1789,
+    viewCount: 5021,
     citationCount: 134
   },
   {
@@ -87,6 +92,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=6&size=128',
     tags: ['epidemiology', 'infectious diseases', 'outbreak investigation'],
     downloadCount: 2156,
+    viewCount: 6120,
     citationCount: 198
   },
   {
@@ -102,6 +108,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=7&size=128',
     tags: ['infectious diseases', 'HIV', 'tuberculosis', 'co-infection'],
     downloadCount: 1567,
+    viewCount: 3988,
     citationCount: 78
   },
   {
@@ -116,6 +123,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=8&size=128',
     tags: ['Ethiopian health system', 'primary care', 'health systems'],
     downloadCount: 2987,
+    viewCount: 7123,
     citationCount: 203
   },
   {
@@ -131,6 +139,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=9&size=128',
     tags: ['mental health', 'primary care', 'integration', 'task shifting'],
     downloadCount: 2341,
+    viewCount: 5090,
     citationCount: 145
   },
   {
@@ -146,6 +155,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=10&size=128',
     tags: ['non-communicable diseases', 'hypertension', 'diabetes', 'urban health'],
     downloadCount: 1892,
+    viewCount: 4311,
     citationCount: 112
   },
   {
@@ -160,6 +170,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=11&size=128',
     tags: ['biostatistics', 'public health', 'research methods'],
     downloadCount: 3456,
+    viewCount: 9801,
     citationCount: 267
   },
   {
@@ -173,6 +184,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=12&size=128',
     tags: ['immunization', 'vaccine hesitancy', 'adolescents'],
     downloadCount: 987,
+    viewCount: 2650,
     citationCount: 45
   },
   {
@@ -188,6 +200,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=13&size=128',
     tags: ['health economics', 'hypertension', 'cost-effectiveness'],
     downloadCount: 2765,
+    viewCount: 6430,
     citationCount: 189
   },
   {
@@ -203,6 +216,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=14&size=128',
     tags: ['WASH', 'child health', 'diarrheal disease', 'environmental health'],
     downloadCount: 3124,
+    viewCount: 8890,
     citationCount: 234
   },
   {
@@ -218,6 +232,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=15&size=128',
     tags: ['digital health', 'community health workers', 'mHealth'],
     downloadCount: 1987,
+    viewCount: 5212,
     citationCount: 156
   },
   {
@@ -233,6 +248,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=16&size=128',
     tags: ['pharmacology', 'malaria', 'drug resistance'],
     downloadCount: 3421,
+    viewCount: 9023,
     citationCount: 298
   },
   {
@@ -247,6 +263,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=17&size=128',
     tags: ['occupational health', 'workplace safety', 'industrial hygiene'],
     downloadCount: 2234,
+    viewCount: 4780,
     citationCount: 167
   },
   {
@@ -262,6 +279,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=18&size=128',
     tags: ['nutrition', 'obesity', 'non-communicable diseases'],
     downloadCount: 1654,
+    viewCount: 3999,
     citationCount: 98
   },
   {
@@ -277,6 +295,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=19&size=128',
     tags: ['environmental health', 'malaria', 'dengue', 'climate change'],
     downloadCount: 2876,
+    viewCount: 7340,
     citationCount: 223
   },
   {
@@ -292,6 +311,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=20&size=128',
     tags: ['medical ethics', 'clinical research', 'informed consent'],
     downloadCount: 3987,
+    viewCount: 10021,
     citationCount: 345
   },
   {
@@ -306,6 +326,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=21&size=128',
     tags: ['health policy', 'financing', 'universal health coverage'],
     downloadCount: 2567,
+    viewCount: 6021,
     citationCount: 189
   },
   {
@@ -321,6 +342,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=22&size=128',
     tags: ['reproductive health', 'family planning', 'maternal health'],
     downloadCount: 1432,
+    viewCount: 3555,
     citationCount: 87
   },
   {
@@ -334,6 +356,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=23&size=128',
     tags: ['emergency preparedness', 'health systems', 'disaster risk'],
     downloadCount: 1234,
+    viewCount: 2980,
     citationCount: 67
   },
   {
@@ -349,6 +372,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=24&size=128',
     tags: ['injury prevention', 'trauma care', 'epidemiology'],
     downloadCount: 2987,
+    viewCount: 7010,
     citationCount: 234
   },
   {
@@ -364,6 +388,7 @@ export const mockSearchResults: SearchResult[] = [
     thumbnailUrl: 'https://api.dicebear.com/7.x/identicon/png?seed=25&size=128',
     tags: ['epidemiology', 'public health', 'methods'],
     downloadCount: 3456,
+    viewCount: 8802,
     citationCount: 289
   }
 ]

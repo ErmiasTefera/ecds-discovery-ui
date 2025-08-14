@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { FileText, Book, GraduationCap, ExternalLink, Download, Quote, Eye, Sparkles, Loader2, Bookmark } from 'lucide-react'
-import CitationDialog from '@/components/CitationDialog'
-import { useAtom } from 'jotai'
+import { FileText, Book, GraduationCap } from 'lucide-react'
 import type { SearchResult } from '@/models'
-import { httpService } from '@/services/httpService'
-import { isResourceSavedAtom, toggleSaveResourceAtom } from '@/atoms/collectionAtoms'
 import SaveToCollectionModal from './SaveToCollectionModal'
+import SearchResultFooter from './SearchResultFooter'
+import { Bookmark } from 'lucide-react'
+import { useAtom } from 'jotai'
+import { isResourceSavedAtom, toggleSaveResourceAtom } from '@/atoms/collectionAtoms'
 
 
 
@@ -35,32 +35,12 @@ const highlightText = (text: string, searchQuery: string) => {
 }
 
 const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSearchQuery }) => {
-  const [aiSummary, setAiSummary] = useState<string | null>(null)
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
-  const [hasRequestedSummary, setHasRequestedSummary] = useState(false)
-  const [showSaveModal, setShowSaveModal] = useState(false)
-
+  const [showSaveModal, setShowSaveModal] = React.useState(false)
   const isResourceSaved = useAtom(isResourceSavedAtom)[0]
   const [, toggleSave] = useAtom(toggleSaveResourceAtom)
   const searchParams = useSearchParams()
 
-  const handleGetAISummary = async () => {
-    if (hasRequestedSummary) return // Prevent multiple requests
-    
-    setIsLoadingSummary(true)
-    setHasRequestedSummary(true)
-    
-    try {
-      const response = await httpService.getAISummary(result.id)
-      if (response.success) {
-        setAiSummary(response.data.summary)
-      }
-    } catch (error) {
-      console.error('Failed to get AI summary:', error)
-    } finally {
-      setIsLoadingSummary(false)
-    }
-  }
+  
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
       case 'article':
@@ -107,9 +87,10 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
 
   return (
     <div className="bg-background border border-border rounded-lg p-6 hover:shadow-md transition-shadow">
+      
       {/* Header with thumbnail */}
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-3 flex-1">
+        <div className="flex items-center space-x-3 flex-1">
           <div className="flex-shrink-0">
             {result.thumbnailUrl ? (
               <Image
@@ -126,11 +107,24 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 justify-between">
+              <div className="flex items-center gap-2">
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                 {getTypeLabel(result.type)}
               </span>
               <span className="text-sm text-muted-foreground">{result.year}</span>
+              </div>
+              <button
+            onClick={() => toggleSave({ resource: result })}
+            className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              isResourceSaved(result.id)
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                : 'border border-border hover:bg-secondary'
+            }`}
+          >
+            <Bookmark className={`w-3 h-3 ${isResourceSaved(result.id) ? 'fill-current' : ''}`} />
+            <span className="ml-1">{isResourceSaved(result.id) ? 'Saved' : 'Save'}</span>
+          </button>
             </div>
             <Link 
               href={getDetailHref(result.id)}
@@ -184,101 +178,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, currentSear
         </div>
       )}
 
-      {/* AI Summary Section */}
-      <div className="mb-4">
-        {!hasRequestedSummary && (
-          <button
-            onClick={handleGetAISummary}
-            className="inline-flex items-center px-3 py-2 text-sm font-medium text-primary border border-primary rounded-md hover:bg-primary/10 transition-colors"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Get AI Summary
-          </button>
-        )}
-        
-        {isLoadingSummary && (
-          <div className="flex items-center space-x-2 p-3 bg-secondary/50 rounded-md">
-            <Loader2 className="w-4 h-4 animate-spin text-primary" />
-            <span className="text-sm text-muted-foreground">Generating AI summary...</span>
-          </div>
-        )}
-        
-        {aiSummary && (
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-md">
-            <div className="flex items-center space-x-2 mb-2">
-              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">AI Summary</span>
-            </div>
-            <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-              {aiSummary}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Metrics */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-6 text-xs text-muted-foreground">
-          <div className="flex items-center space-x-1">
-            <Quote className="w-3 h-3" />
-            <span>{result.citationCount} citations</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Download className="w-3 h-3" />
-            <span>{result.downloadCount.toLocaleString()} downloads</span>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center space-x-2">
-          {result.doi && (
-            <Link
-              href={`https://doi.org/${result.doi}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-1 border border-border text-xs font-medium rounded-md hover:bg-secondary transition-colors"
-            >
-              DOI
-              <ExternalLink className="w-3 h-3 ml-1" />
-            </Link>
-          )}
-          {result.url && (
-            <Link
-              href={result.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-1 border border-border text-xs font-medium rounded-md hover:bg-secondary transition-colors"
-            >
-              View
-              <ExternalLink className="w-3 h-3 ml-1" />
-            </Link>
-          )}
-          <button
-            onClick={() => toggleSave({ resource: result })}
-            className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-              isResourceSaved(result.id)
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                : 'border border-border hover:bg-secondary'
-            }`}
-          >
-            <Bookmark className={`w-3 h-3 ml-1 ${isResourceSaved(result.id) ? 'fill-current' : ''}`} />
-            {isResourceSaved(result.id) ? 'Saved' : 'Save'}
-          </button>
-          <CitationDialog
-            triggerLabel="Cite"
-            apa={`${result.authors.join(', ')} (${result.year}). ${result.title}. ${result.journal || result.publisher || ''}.`}
-            mla={`${result.authors.join(', ')}. "${result.title}." ${result.journal || result.publisher || ''}, ${result.year}.`}
-            chicago={`${result.authors.join(', ')}. ${result.year}. ${result.title}. ${result.journal || result.publisher || ''}.`}
-          />
-          <Link
-            href={getDetailHref(result.id)}
-            className="inline-flex items-center px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Details
-            <Eye className="w-3 h-3 ml-1" />
-          </Link>
-        </div>
-      </div>
+      <SearchResultFooter result={result} detailHref={getDetailHref(result.id)} />
       
       {/* Save to Collection Modal */}
       <SaveToCollectionModal

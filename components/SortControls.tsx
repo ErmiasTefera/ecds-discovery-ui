@@ -1,6 +1,5 @@
 import React from 'react'
 import { useAtom } from 'jotai'
-import { SortAsc, SortDesc } from 'lucide-react'
 import {
   sortByAtom,
   sortDirectionAtom,
@@ -17,7 +16,7 @@ import type { SortOption } from '@/services'
 
 const SortControls: React.FC = () => {
   const [sortBy, setSortBy] = useAtom(sortByAtom)
-  const [sortDirection, setSortDirection] = useAtom(sortDirectionAtom)
+  const [, setSortDirection] = useAtom(sortDirectionAtom)
   const [, setCurrentPage] = useAtom(currentPageAtom)
 
   const handleSortChange = (newSortBy: SortOption) => {

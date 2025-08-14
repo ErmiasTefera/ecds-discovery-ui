@@ -4,13 +4,17 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, Dialog
 import { Button } from '@/components/ui/button'
 import Filter from '@/components/Filter'
 import { useAtom } from 'jotai'
-import { clearAllFiltersAtom, commitDraftFiltersAtom, resetDraftFiltersAtom, editModeAtom } from '@/atoms/filterAtoms'
+import { clearAllFiltersAtom, commitDraftFiltersAtom, resetDraftFiltersAtom, editModeAtom, draftSelectedFiltersAtom } from '@/atoms/filterAtoms'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const FilterDialog: React.FC = () => {
   const [, clearAll] = useAtom(clearAllFiltersAtom)
   const [, commitDraft] = useAtom(commitDraftFiltersAtom)
   const [, resetDraft] = useAtom(resetDraftFiltersAtom)
   const [, setEditMode] = useAtom(editModeAtom)
+  const [draftSelected] = useAtom(draftSelectedFiltersAtom)
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   return (
     <Dialog>
@@ -21,17 +25,39 @@ const FilterDialog: React.FC = () => {
       </DialogTrigger>
       <DialogContent className="p-0" onOpenAutoFocus={() => { setEditMode('dialog'); resetDraft() }}>
         <DialogHeader className="p-4 border-b">
+          <DialogTitle>Filters</DialogTitle>
         </DialogHeader>
         <div className="p-4 max-h-[70vh] overflow-y-auto">
-          <Filter />
+          <Filter showActiveControls={false} />
         </div>
         <DialogFooter className="p-4 border-t">
-          <Button variant="ghost" onClick={() => clearAll()}>Clear</Button>
+          <DialogClose asChild>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                clearAll()
+                const params = new URLSearchParams(searchParams?.toString() || '')
+                params.delete('facets')
+                router.push(`/search?${params.toString()}`)
+              }}
+            >
+              Clear
+            </Button>
+          </DialogClose>
           <DialogClose asChild>
             <Button variant="outline">Close</Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button onClick={() => commitDraft()}>Apply</Button>
+            <Button
+              onClick={() => {
+                commitDraft()
+                const params = new URLSearchParams(searchParams?.toString() || '')
+                params.set('facets', encodeURIComponent(JSON.stringify(draftSelected)))
+                router.push(`/search?${params.toString()}`)
+              }}
+            >
+              Apply
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

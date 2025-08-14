@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button'
 import { Copy, QrCode, Share } from 'lucide-react'
 import type { DetailResource } from '@/models'
+import QRCode from 'qrcode'
 
 interface ShareExportDialogProps {
   resource: DetailResource
@@ -20,13 +21,21 @@ const ShareExportDialog: React.FC<ShareExportDialogProps> = ({ resource }) => {
     try { await navigator.clipboard.writeText(text) } catch {}
   }
 
-  // Lazy-generate a QR code using a lightweight data URI API (no extra deps)
-  const generateQr = async () => {
-    // Use Google Chart API as a quick QR generator
-    const encoded = encodeURIComponent(link)
-    const url = `https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=${encoded}`
-    setQrDataUrl(url)
-  }
+  // Generate QR code using qrcode library
+  React.useEffect(() => {
+    if (!qrDataUrl && typeof window !== 'undefined' && link) {
+      QRCode.toDataURL(link, {
+        width: 240,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      .then(url => setQrDataUrl(url))
+      .catch(err => console.error('Error generating QR code:', err))
+    }
+  }, [qrDataUrl, link])
 
   const toBibTeX = (): string => {
     const authors = (resource.authors || []).map(a => a.replace(/,/g, '')).join(' and ')
@@ -117,7 +126,10 @@ const ShareExportDialog: React.FC<ShareExportDialogProps> = ({ resource }) => {
               <p className="text-sm text-muted-foreground mb-2">QR Code</p>
               <div className="flex items-center gap-3">
                 <div className="w-40 h-40 border border-border rounded-md flex items-center justify-center bg-white">
-                  {qrDataUrl ? (<img src={qrDataUrl} alt="QR" className="w-full h-full object-contain"/>) : (
+                  {qrDataUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={qrDataUrl} alt="QR Code" className="w-full h-full object-contain" />
+                  ) : (
                     <QrCode className="w-8 h-8 text-muted-foreground" />
                   )}
                 </div>

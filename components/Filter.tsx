@@ -23,7 +23,13 @@ import SortControls from './SortControls'
 import ActiveFilters from './ActiveFilters'
 // ActiveFilters is used elsewhere; Filter focuses on groups and selection
 
-const Filter: React.FC = () => {
+interface FilterProps {
+  onApplied?: () => void
+  onCleared?: () => void
+  showActiveControls?: boolean
+}
+
+const Filter: React.FC<FilterProps> = ({ onApplied, onCleared, showActiveControls = true }) => {
   const [filters, setFilters] = useAtom(filtersAtom)
   const [loading, setLoading] = useAtom(filtersLoadingAtom)
   const [error, setError] = useAtom(filtersErrorAtom)
@@ -99,16 +105,22 @@ const Filter: React.FC = () => {
   }
 
   return (
-    <div className="bg-background border border-border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Refine Results</h2>
-      </div>
+    <div className={showActiveControls ? "bg-background border border-border rounded-lg p-4" : ""}>
+      {showActiveControls && (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Refine Results</h2>
+        </div>
+      )}
       
-      <ActiveFilters />
+      {showActiveControls && (
+        <ActiveFilters onApplied={onApplied} onCleared={onCleared} />
+      )}
 
-      <div className='mt-4 flex items-center justify-between'>
-      <SortControls/>
-      </div>
+      {showActiveControls && (
+        <div className='mt-4 flex items-center justify-between'>
+          <SortControls/>
+        </div>
+      )}
 
       {/* Filter Groups */}
       <div className="mt-4 space-y-4">

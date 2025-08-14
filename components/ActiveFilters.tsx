@@ -14,7 +14,12 @@ import {
 } from '@/atoms/filterAtoms'
 import { Button } from '@/components/ui/button'
 
-const ActiveFilters: React.FC = () => {
+interface ActiveFiltersProps {
+  onApplied?: () => void
+  onCleared?: () => void
+}
+
+const ActiveFilters: React.FC<ActiveFiltersProps> = ({ onApplied, onCleared }) => {
   const [selectedFilters] = useAtom(selectedFiltersAtom)
   const [filters] = useAtom(filtersAtom)
   const [totalSelected] = useAtom(totalSelectedCountAtom)
@@ -62,6 +67,7 @@ const ActiveFilters: React.FC = () => {
               const params = new URLSearchParams(searchParams?.toString() || '')
               params.set('facets', encodeURIComponent(JSON.stringify(draftSelected)))
               router.push(`/search?${params.toString()}`)
+              onApplied?.()
             }}
             disabled={totalDraftSelected === 0}
             size="sm"
@@ -76,6 +82,7 @@ const ActiveFilters: React.FC = () => {
               const params = new URLSearchParams(searchParams?.toString() || '')
               params.delete('facets')
               router.push(`/search?${params.toString()}`)
+              onCleared?.()
             }}
           >
             Clear all

@@ -21,7 +21,7 @@ const CitationDialog: React.FC<CitationDialogProps> = ({ triggerLabel = 'Cite', 
     try {
       await navigator.clipboard.writeText(text)
     } catch (e) {
-      // noop
+      console.error('Error copying citation:', e)
     }
   }
 
